@@ -6,6 +6,9 @@
 ###             through ctf2m4 and ctf2m6, which the engine
 ###             has problems with (barryp)
 ###
+### 2001-02-17  Cleaned up translation a bit. ClientObituary is
+###             a real bitch, and could still be looked at (barryp)
+###
 from qwpython.qwsv import engine, Vector
 from qwpython.qcsupport import qc
 
@@ -28,6 +31,7 @@ import grapple
 modelindex_eyes = 0
 modelindex_player = 0
 pregameover = 0
+
 #  ZOID: with several effects doing the dimlight thing, they just can't
 #  turn it off.  Do not set self.effects with EF_DIMLIGHT directly.  This
 #  will automatically do it when CheckPowerups is called
@@ -36,11 +40,11 @@ pregameover = 0
 #  2. Super Damage (Quad Power)
 #  3. Having Flag in Capture
 #  self is player
-
+#
 def CheckDimLight(*qwp_extra):
     flag = 0
-    flag = 0
-    #  invincable
+
+    #  invincible
     if qc.self.invincible_finished > qc.time:
         flag = 1
     #  quad
@@ -49,10 +53,12 @@ def CheckDimLight(*qwp_extra):
     #  flag
     if qc.self.player_flag & defs.ITEM_ENEMY_FLAG:
         flag = 1
+
     if flag:
         qc.self.effects |= defs.EF_DIMLIGHT
     else:
         qc.self.effects -= qc.self.effects & defs.EF_DIMLIGHT
+
     
 # 
 # =============================================================================
@@ -64,11 +70,12 @@ def CheckDimLight(*qwp_extra):
 nextmap = None
 intermission_running = 0
 intermission_exittime = 0
+
+#
 # QUAKED info_intermission (1 0.5 0.5) (-16 -16 -16) (16 16 16)
 # This is the camera point for the intermission.
 # Use mangle instead of angle, so you can set pitch or roll as well as yaw.  'pitch roll yaw'
 # 
-
 def info_intermission(*qwp_extra):
     pass
 
@@ -105,8 +112,7 @@ def SetNewParms(*qwp_extra):
         qc.parm2 = 100
         qc.parm4 = 0
         qc.parm8 = defs.IT_AXE
-        qc.parm10 = 1
-        
+        qc.parm10 = 1        
     else:
         if engine.cvar('teamplay') & teamplay.TEAM_DISABLE_GRAPPLE:
             qc.parm1 = defs.IT_SHOTGUN | defs.IT_AXE
@@ -137,8 +143,7 @@ def DecodeLevelParms(*qwp_extra):
     qc.self.statstate = qc.parm14
     if defs.gamestart:
         SetNewParms() #  take away all stuff on starting new episode
-        qc.self.ctfskinno = 0
-        
+        qc.self.ctfskinno = 0        
     else:
         qc.self.ctfskinno = (qc.self.player_flag & 65280) / 256
         teamplay.TeamSkinSet()
@@ -162,6 +167,7 @@ def DecodeLevelParms(*qwp_extra):
     #  *TEAMPLAY*
     if teamplay.TeamColorIsLegal(qc.parm10):
         qc.self.steam = qc.parm10
+
     
 # 
 # ============
@@ -170,10 +176,7 @@ def DecodeLevelParms(*qwp_extra):
 # Returns the entity to view from
 # ============
 # 
-
 def FindIntermission(*qwp_extra):
-    spot = engine.world
-    cyc = 0
     #  look for info_intermission first
     spot = qc.find(qc.world, 'classname', 'info_intermission')
     if spot:
@@ -183,8 +186,7 @@ def FindIntermission(*qwp_extra):
             spot = qc.find(spot, 'classname', 'info_intermission')
             if not spot:
                 spot = qc.find(spot, 'classname', 'info_intermission')
-            cyc -= 1
-            
+            cyc -= 1            
         return spot
         
     #  then look for the start position
@@ -196,6 +198,7 @@ def FindIntermission(*qwp_extra):
 
 def GotoNextMap(*qwp_extra):
     global nextmap
+
     if engine.cvar('samelevel'): #  if samelevel is set, stay on same level
         engine.changelevel(qc.mapname)
     else:
@@ -214,13 +217,13 @@ def GotoNextMap(*qwp_extra):
 # When the player presses attack or jump, change to the next level
 # ============
 # 
-
 def IntermissionThink(*qwp_extra):
     if qc.time < intermission_exittime:
         return 
     if not qc.self.button0 and not qc.self.button1 and not qc.self.button2:
         return 
     GotoNextMap()
+
     
 # 
 # ============
@@ -230,11 +233,10 @@ def IntermissionThink(*qwp_extra):
 # Take the players to the intermission spot
 # ============
 # 
-
 def execute_changelevel(*qwp_extra):
     global intermission_running
     global intermission_exittime
-    pos = engine.world
+
     intermission_running = 1
     #  enforce a wait time before allowing changelevel
     intermission_exittime = qc.time + 8
@@ -258,10 +260,9 @@ def execute_changelevel(*qwp_extra):
         qc.other = qc.find(qc.other, 'classname', 'player')
         
     
-
 def changelevel_touch(*qwp_extra):
     global nextmap
-    pos = engine.world
+
     if qc.other.classname != 'player':
         return 
     #  if "noexit" is set, blow up the player trying to leave
@@ -278,11 +279,11 @@ def changelevel_touch(*qwp_extra):
     #  in the middle of C movement code, so set a think time to do it
     qc.self.think = execute_changelevel
     qc.self.nextthink = qc.time + 0.1
+
     
 # QUAKED trigger_changelevel (0.5 0.5 0.5) ? NO_INTERMISSION
 # When the player touches this, he gets sent to the map listed in the "map" variable.  Unless the NO_INTERMISSION flag is set, the view will go to the info_intermission spot and display stats.
 # 
-
 def trigger_changelevel(*qwp_extra):
     if defs.gamestart:
         if qc.self.map == 'e1m1':
@@ -305,6 +306,7 @@ def trigger_changelevel(*qwp_extra):
         qc.objerror("chagnelevel trigger doesn't have map")
     subs.InitTrigger()
     qc.self.touch = changelevel_touch
+
     
 # 
 # =============================================================================
@@ -314,7 +316,7 @@ def trigger_changelevel(*qwp_extra):
 # =============================================================================
 # 
 #  called by ClientKill and DeadThink
-
+#
 def respawn(*qwp_extra):
     #  make a copy of the dead body for appearances sake
     world.CopyToBodyQue(qc.self)
@@ -322,6 +324,7 @@ def respawn(*qwp_extra):
     SetNewParms()
     #  respawn		
     PutClientInServer()
+ 
     
 # 
 # ============
@@ -330,7 +333,6 @@ def respawn(*qwp_extra):
 # Player entered the suicide command
 # ============
 # 
-
 def ClientKill(*qwp_extra):
     if defs.gamestart:
         qc.self.sprint(defs.PRINT_HIGH, 'Life just started.\012')
@@ -354,6 +356,7 @@ def ClientKill(*qwp_extra):
 
 def CheckSpawnPoint(v, *qwp_extra):
     return defs.FALSE
+
     
 # 
 # ============
@@ -362,11 +365,7 @@ def CheckSpawnPoint(v, *qwp_extra):
 # Returns the entity to spawn at
 # ============
 # 
-
 def SelectSpawnPoint(*qwp_extra):
-    spot = engine.world
-    thing = engine.world
-    pcount = 0
     #  testinfo_player_start is only found in regioned levels
     spot = qc.find(qc.world, 'classname', 'testplayerstart')
     if spot:
@@ -376,8 +375,7 @@ def SelectSpawnPoint(*qwp_extra):
     if not qc.self.killed:
         spot = teamplay.TeamCaptureSpawn()
         if spot != qc.world:
-            return spot
-        
+            return spot        
     elif defs.gamestart and qc.self.killed:
         ctfgame.lastvotespawn = qc.find(ctfgame.lastvotespawn, 'classname', 'info_vote_destination')
         if ctfgame.lastvotespawn == qc.world:
@@ -393,6 +391,7 @@ def SelectSpawnPoint(*qwp_extra):
     if not spot:
         qc.error('PutClientInServer: no info_player_start on level')
     return spot
+
     
 # 
 # ===========
@@ -401,9 +400,10 @@ def SelectSpawnPoint(*qwp_extra):
 # 
 # ============
 # 
-
 def ValidateUser(e, *qwp_extra):
     pass
+    
+    
 # 
 # ===========
 # PutClientInServer
@@ -411,12 +411,10 @@ def ValidateUser(e, *qwp_extra):
 # called each time a player enters a new level
 # ============
 # 
-
 def PutClientInServer(*qwp_extra):
     global modelindex_eyes
     global modelindex_player
-    spot = engine.world
-    spd = 0
+
     qc.serverflags = 0 #  make sure
     qc.self.classname = 'player'
     qc.self.health = 100
@@ -472,6 +470,7 @@ def PutClientInServer(*qwp_extra):
     #  grapple stuff
     qc.self.on_hook = defs.FALSE
     qc.self.hook_out = defs.FALSE
+
     
 # 
 # =============================================================================
@@ -483,29 +482,32 @@ def PutClientInServer(*qwp_extra):
 # QUAKED info_player_start (1 0 0) (-16 -16 -24) (16 16 24)
 # The normal starting point for a level.
 # 
-
 def info_player_start(*qwp_extra):
     pass
+    
+    
 # QUAKED info_player_start2 (1 0 0) (-16 -16 -24) (16 16 24)
 # Only used on start map for the return point from an episode.
 # 
-
 def info_player_start2(*qwp_extra):
     pass
+    
+    
 # QUAKED info_player_deathmatch (1 0 1) (-16 -16 -24) (16 16 24)
 # potential spawning position for deathmatch games
 # 
-
 def info_player_deathmatch(*qwp_extra):
     if defs.deathmatch:
         items.StartRuneSpawn()
+
     
 # QUAKED info_player_coop (1 0 1) (-16 -16 -24) (16 16 24)
 # potential spawning position for coop games
 # 
-
 def info_player_coop(*qwp_extra):
     pass
+    
+    
 # 
 # ===============================================================================
 # 
@@ -517,10 +519,9 @@ def info_player_coop(*qwp_extra):
 # go to the next level for deathmatch
 # only called if a time or frag limit has expired
 # 
-
 def NextLevel(*qwp_extra):
     global nextmap
-    o = engine.world
+    
     #  episode one
     if qc.mapname == 'e1m1':
         nextmap = 'e1m2'
@@ -633,6 +634,7 @@ def NextLevel(*qwp_extra):
     o.think = execute_changelevel
     o.nextthink = qc.time + 0.1
     return 
+    
     #  DISABLED from here
     #  find a trigger changelevel
     o = qc.find(qc.world, 'classname', 'trigger_changelevel')
@@ -656,13 +658,10 @@ def NextLevel(*qwp_extra):
 # Exit deathmatch games upon conditions
 # ============
 # 
-
 def CheckRules(*qwp_extra):
     global pregameover
     global nextmap
-    timelimit = 0
-    fraglimit = 0
-    o = engine.world
+
     if defs.gameover or pregameover: #  someone else quit the game already
         return 
     if defs.gamestart:
@@ -673,8 +672,6 @@ def CheckRules(*qwp_extra):
             o.map = nextmap
             o.think = execute_changelevel
             o.nextthink = qc.time + 0.1
-            return 
-            
         return 
         
     timelimit = engine.cvar('timelimit') * 60
@@ -683,14 +680,11 @@ def CheckRules(*qwp_extra):
         pregameover = 1
         status.TeamEndScore()
         NextLevel()
-        return 
         
     
 # ============================================================================
 
 def PlayerDeathThink(*qwp_extra):
-    old_self = engine.world
-    forward = 0
     if (qc.self.flags & defs.FL_ONGROUND):
         forward = qc.self.velocity.length()
         forward -= 20
@@ -716,8 +710,6 @@ def PlayerDeathThink(*qwp_extra):
     
 
 def PlayerJump(*qwp_extra):
-    start = Vector(0, 0, 0)
-    end = Vector(0, 0, 0)
     if qc.self.flags & defs.FL_WATERJUMP:
         return 
     if qc.self.waterlevel >= 2:
@@ -727,10 +719,8 @@ def PlayerJump(*qwp_extra):
             if random.random() < 0.5:
                 qc.self.sound(defs.CHAN_BODY, 'misc/water1.wav', 1, defs.ATTN_NORM)
             else:
-                qc.self.sound(defs.CHAN_BODY, 'misc/water2.wav', 1, defs.ATTN_NORM)
-            
-        return 
-        
+                qc.self.sound(defs.CHAN_BODY, 'misc/water2.wav', 1, defs.ATTN_NORM)            
+        return         
     if not (qc.self.flags & defs.FL_ONGROUND):
         return 
     if not (qc.self.flags & defs.FL_JUMPRELEASED):
@@ -739,6 +729,7 @@ def PlayerJump(*qwp_extra):
     qc.self.button2 = 0
     #  player jumping sound
     qc.self.sound(defs.CHAN_BODY, 'player/plyrjmp8.wav', 1, defs.ATTN_NORM)
+
     
 # 
 # ===========
@@ -746,21 +737,20 @@ def PlayerJump(*qwp_extra):
 # 
 # ============
 # 
-
 def WaterMove(*qwp_extra):
     # dprint (ftos(self.waterlevel));
     if qc.self.movetype == defs.MOVETYPE_NOCLIP:
         return 
     if qc.self.health < 0:
         return 
+        
     if qc.self.waterlevel != 3:
         if qc.self.air_finished < qc.time:
             qc.self.sound(defs.CHAN_VOICE, 'player/gasp2.wav', 1, defs.ATTN_NORM)
         elif qc.self.air_finished < qc.time + 9:
             qc.self.sound(defs.CHAN_VOICE, 'player/gasp1.wav', 1, defs.ATTN_NORM)
         qc.self.air_finished = qc.time + 12
-        qc.self.dmg = 2
-        
+        qc.self.dmg = 2        
     elif qc.self.air_finished < qc.time:
         #  drown!
         if qc.self.pain_finished < qc.time:
@@ -769,14 +759,12 @@ def WaterMove(*qwp_extra):
                 qc.self.dmg = 10
             combat.T_Damage(qc.self, qc.world, qc.world, qc.self.dmg)
             qc.self.pain_finished = qc.time + 1
-            
-        
+                    
     if not qc.self.waterlevel:
         if qc.self.flags & defs.FL_INWATER:
             #  play leave water sound
             qc.self.sound(defs.CHAN_BODY, 'misc/outwater.wav', 1, defs.ATTN_NORM)
-            qc.self.flags -= defs.FL_INWATER
-            
+            qc.self.flags -= defs.FL_INWATER            
         return 
         
     if qc.self.watertype == defs.CONTENT_LAVA:
@@ -786,16 +774,13 @@ def WaterMove(*qwp_extra):
                 qc.self.dmgtime = qc.time + 1
             else:
                 qc.self.dmgtime = qc.time + 0.2
-            combat.T_Damage(qc.self, qc.world, qc.world, 10 * qc.self.waterlevel)
-            
-        
+            combat.T_Damage(qc.self, qc.world, qc.world, 10 * qc.self.waterlevel)                    
     elif qc.self.watertype == defs.CONTENT_SLIME:
         #  do damage
         if qc.self.dmgtime < qc.time and qc.self.radsuit_finished < qc.time:
             qc.self.dmgtime = qc.time + 1
             combat.T_Damage(qc.self, qc.world, qc.world, 4 * qc.self.waterlevel)
-            
-        
+                    
     if not (qc.self.flags & defs.FL_INWATER):
         #  player enter water sound
         if qc.self.watertype == defs.CONTENT_LAVA:
@@ -808,10 +793,7 @@ def WaterMove(*qwp_extra):
         qc.self.dmgtime = 0
         
     
-
 def CheckWaterJump(*qwp_extra):
-    start = Vector(0, 0, 0)
-    end = Vector(0, 0, 0)
     #  check for a jump-out-of-water
     qc.makevectors(qc.self.angles)
     start = qc.self.origin
@@ -833,9 +815,8 @@ def CheckWaterJump(*qwp_extra):
             qc.self.flags -= qc.self.flags & defs.FL_JUMPRELEASED
             qc.self.teleport_time = qc.time + 2 #  safety net
             return 
+
             
-        
-    
 # 
 # ================
 # PlayerPreThink
@@ -843,14 +824,10 @@ def CheckWaterJump(*qwp_extra):
 # Called every frame before physics are run
 # ================
 # 
-
 def PlayerPreThink(*qwp_extra):
-    mspeed = 0
-    aspeed = 0
-    r = 0
     if intermission_running > 0:
         IntermissionThink() #  otherwise a button could be missed between
-        return  #  the think tics
+        return              #  the think tics
         
     status.TeamCapturePlayerUpdate()
     if qc.self.view_ofs == Vector(0, 0, 0):
@@ -858,10 +835,12 @@ def PlayerPreThink(*qwp_extra):
     qc.makevectors(qc.self.v_angle) #  is this still used
     CheckRules()
     WaterMove()
+    
     #  *TEAMPLAY*
     #  TeamCheckLock performs all necessary teamlock checking, and performs all
     #  actions needed.
     teamplay.TeamCheckLock()
+    
     # 
     # 	if (self.waterlevel == 2)
     # 		CheckWaterJump ();
@@ -873,8 +852,7 @@ def PlayerPreThink(*qwp_extra):
     if qc.self.deadflag == defs.DEAD_DYING:
         return  #  dying, so do nothing
     if qc.self.button2:
-        PlayerJump()
-        
+        PlayerJump()        
     else:
         qc.self.flags |= defs.FL_JUMPRELEASED
     #  teleporters can force a non-moving pause time	
@@ -896,10 +874,7 @@ def PlayerPreThink(*qwp_extra):
                 if qc.self.armorvalue > 150:
                     qc.self.armorvalue = 150
                 qc.self.regen_time += 0.5
-                weapons.RegenerationSound()
-                
-            
-        
+                weapons.RegenerationSound()                                    
     #  RUNE
     if qc.time > qc.self.attack_finished and qc.self.currentammo == 0 and qc.self.weapon != defs.IT_AXE and qc.self.weapon != defs.IT_GRAPPLE:
         qc.self.weapon = weapons.W_BestWeapon()
@@ -909,6 +884,7 @@ def PlayerPreThink(*qwp_extra):
     if qc.self.on_hook:
         grapple.Service_Grapple()
     
+    
 # 
 # ================
 # CheckPowerups
@@ -916,7 +892,6 @@ def PlayerPreThink(*qwp_extra):
 # Check for turning off powerups
 # ================
 # 
-
 def CheckPowerups(*qwp_extra):
     if qc.self.health <= 0:
         return 
@@ -937,8 +912,7 @@ def CheckPowerups(*qwp_extra):
             if qc.self.invisible_time < qc.time:
                 qc.self.invisible_time = qc.time + 1
                 qc.self.stuffcmd('bf\012')
-                
-            
+                          
         if qc.self.invisible_finished < qc.time:
             #  just stopped
             qc.self.items -= defs.IT_INVISIBILITY
@@ -947,10 +921,10 @@ def CheckPowerups(*qwp_extra):
             
         #  use the eyes
         qc.self.frame = 0
-        qc.self.modelindex = modelindex_eyes
-        
+        qc.self.modelindex = modelindex_eyes        
     else:
         qc.self.modelindex = modelindex_player #  don't use eyes
+        
     #  invincibility
     if qc.self.invincible_finished:
         #  sound and screen flash when items starts to run out
@@ -959,13 +933,11 @@ def CheckPowerups(*qwp_extra):
                 qc.self.sprint(defs.PRINT_HIGH, 'Protection is almost burned out\012')
                 qc.self.stuffcmd('bf\012')
                 qc.self.sound(defs.CHAN_AUTO, 'items/protect2.wav', 1, defs.ATTN_NORM)
-                qc.self.invincible_time = qc.time + 1
-                
+                qc.self.invincible_time = qc.time + 1                
             if qc.self.invincible_time < qc.time:
                 qc.self.invincible_time = qc.time + 1
                 qc.self.stuffcmd('bf\012')
-                
-            
+                            
         if qc.self.invincible_finished < qc.time:
             #  just stopped
             qc.self.items -= defs.IT_INVULNERABILITY
@@ -992,8 +964,7 @@ def CheckPowerups(*qwp_extra):
             if qc.self.super_time < qc.time:
                 qc.self.super_time = qc.time + 1
                 qc.self.stuffcmd('bf\012')
-                
-            
+                            
         if qc.self.super_damage_finished < qc.time:
             #  just stopped
             qc.self.items -= defs.IT_QUAD
@@ -1021,17 +992,16 @@ def CheckPowerups(*qwp_extra):
             if qc.self.rad_time < qc.time:
                 qc.self.rad_time = qc.time + 1
                 qc.self.stuffcmd('bf\012')
-                
-            
+                            
         if qc.self.radsuit_finished < qc.time:
             #  just stopped
             qc.self.items -= defs.IT_SUIT
             qc.self.rad_time = 0
             qc.self.radsuit_finished = 0
-            
-        
+                    
     #  Check to see about DIMLIGHT effects
     CheckDimLight()
+    
     
 # 
 # ================
@@ -1040,11 +1010,7 @@ def CheckPowerups(*qwp_extra):
 # Called every frame after physics are run
 # ================
 # 
-
 def PlayerPostThink(*qwp_extra):
-    mspeed = 0
-    aspeed = 0
-    r = 0
     # dprint ("post think\n");
     if qc.self.view_ofs == Vector(0, 0, 0):
         return  #  intermission or finale
@@ -1057,14 +1023,14 @@ def PlayerPostThink(*qwp_extra):
         elif qc.self.jump_flag < -650:
             combat.T_Damage(qc.self, qc.world, qc.world, 5)
             qc.self.sound(defs.CHAN_VOICE, 'player/land2.wav', 1, defs.ATTN_NORM)
-            qc.self.deathtype = 'falling'
-            
+            qc.self.deathtype = 'falling'            
         else:
             qc.self.sound(defs.CHAN_VOICE, 'player/land.wav', 1, defs.ATTN_NORM)
         
     qc.self.jump_flag = qc.self.velocity.z
     CheckPowerups()
     weapons.W_WeaponFrame()
+
     
 # 
 # ===========
@@ -1073,7 +1039,6 @@ def PlayerPostThink(*qwp_extra):
 # called when a player connects to a server
 # ============
 # 
-
 def ClientConnect(*qwp_extra):
     engine.bprint(defs.PRINT_HIGH, qc.self.netname)
     engine.bprint(defs.PRINT_HIGH, ' entered the game\012')
@@ -1094,6 +1059,7 @@ def ClientConnect(*qwp_extra):
     #  a client connecting during an intermission can cause problems
     if intermission_running:
         GotoNextMap()
+
     
 # 
 # ===========
@@ -1102,7 +1068,6 @@ def ClientConnect(*qwp_extra):
 # called when a player disconnects from a server
 # ============
 # 
-
 def ClientDisconnect(*qwp_extra):
     #  let everyone else know
     engine.bprint(defs.PRINT_HIGH, qc.self.netname)
@@ -1118,8 +1083,6 @@ def ClientDisconnect(*qwp_extra):
     qc.self.frags = 0
     qc.self.statstate = 0
     
-#  *TEAMPLAY*
-#  Prototypes
 # 
 # ===========
 # ClientObituary
@@ -1127,18 +1090,17 @@ def ClientDisconnect(*qwp_extra):
 # called when a player dies
 # ============
 # 
-
 def ClientObituary(targ, attacker, *qwp_extra):
     #  *XXX* EXPERT CTF variable for 
     #  flag/flag carrier defense bonus determination
     head = engine.world
     flag_radius = 0
     flag_carrier_radius = 0
-    rnum = 0
     temp = 0
     deathstring = None
     deathstring2 = None
     s = None
+    
     rnum = random.random()
     if targ.classname == 'player':
         #  *XXX* EXPERT CTF: 
@@ -1152,8 +1114,7 @@ def ClientObituary(targ, attacker, *qwp_extra):
                 if head.steam != targ.steam:
                     head.last_hurt_carrier = -10
                 head = qc.find(head, 'classname', 'player')
-                
-            
+                            
         #  END EXPERT CTF
         if attacker.classname == 'teledeath':
             engine.bprint(defs.PRINT_MEDIUM, targ.netname)
@@ -1182,23 +1143,17 @@ def ClientObituary(targ, attacker, *qwp_extra):
                     if defs.teamplay & teamplay.TEAM_STATIC_TEAMS:
                         engine.bprint(defs.PRINT_MEDIUM, ' tried to change teams\012')
                     else:
-                        engine.bprint(defs.PRINT_MEDIUM, ' changed teams\012')
-                    
+                        engine.bprint(defs.PRINT_MEDIUM, ' changed teams\012')                    
                 elif targ.weapon == 64 and targ.waterlevel > 1:
                     engine.bprint(defs.PRINT_MEDIUM, ' discharges into the water.\012')
-                    return 
-                    
+                    return                     
                 elif targ.weapon == defs.IT_GRENADE_LAUNCHER:
-                    engine.bprint(defs.PRINT_MEDIUM, ' tries to put the pin back in\012')
-                    
+                    engine.bprint(defs.PRINT_MEDIUM, ' tries to put the pin back in\012')                    
                 elif rnum:
-                    engine.bprint(defs.PRINT_MEDIUM, ' becomes bored with life\012')
-                    
+                    engine.bprint(defs.PRINT_MEDIUM, ' becomes bored with life\012')                    
                 else:
-                    engine.bprint(defs.PRINT_MEDIUM, ' checks if his weapon is loaded\012')
-                    
-                return 
-                
+                    engine.bprint(defs.PRINT_MEDIUM, ' checks if his weapon is loaded\012')                    
+                return                 
             else:
                 #  *TEAMPLAY*
                 #  TeamFragPenalty returns true if the attacker gets a frag penalty for
@@ -1262,8 +1217,7 @@ def ClientObituary(targ, attacker, *qwp_extra):
                     #  flag and the flag carrier at the same time, but not cumulative with
                     #  respect to both the target and attacker being near the object being defended
                     #  find flags or flag carriers within a radius of the attacker
-                    head = qc.findradius(attacker.origin, teamplay.TEAM_CAPTURE_ATTACKER_PROTECT_RADIUS)
-                    while head:
+                    for head in engine.findradius(attacker.origin, teamplay.TEAM_CAPTURE_ATTACKER_PROTECT_RADIUS):
                         if head.classname == 'player':
                             if (head.steam == attacker.steam) and (head.player_flag & defs.ITEM_ENEMY_FLAG) and (head != attacker) and (not flag_carrier_radius):
                                 #  attacker was near his own flag carrier
@@ -1273,8 +1227,7 @@ def ClientObituary(targ, attacker, *qwp_extra):
                                 engine.bprint(defs.PRINT_MEDIUM, ' defends ')
                                 engine.bprint(defs.PRINT_MEDIUM, s)
                                 engine.bprint(defs.PRINT_MEDIUM, "'s flag carrier\012")
-                                
-                            
+                                                            
                         if (head.classname == 'item_flag_team1') or (head.classname == 'item_flag_team2'):
                             if ((attacker.steam == teamplay.TEAM_COLOR1) and (head.classname == 'item_flag_team1')) or ((attacker.steam == teamplay.TEAM_COLOR2) and (head.classname == 'item_flag_team2')):
                                 #  attacker was near his own flag
@@ -1284,13 +1237,9 @@ def ClientObituary(targ, attacker, *qwp_extra):
                                 engine.bprint(defs.PRINT_MEDIUM, ' defends the ')
                                 engine.bprint(defs.PRINT_MEDIUM, s)
                                 engine.bprint(defs.PRINT_MEDIUM, ' flag\012')
-                                
-                            
-                        head = head.chain
-                        
+                                                                                    
                     #  find flags or flag carriers within a radius from the target
-                    head = qc.findradius(targ.origin, teamplay.TEAM_CAPTURE_TARGET_PROTECT_RADIUS)
-                    while head:
+                    for head in engine.findradius(targ.origin, teamplay.TEAM_CAPTURE_TARGET_PROTECT_RADIUS):
                         if head.classname == 'player':
                             if (head.steam == attacker.steam) and (head.player_flag & defs.ITEM_ENEMY_FLAG) and (head != attacker) and (not flag_carrier_radius):
                                 #  prevents redundant points awarded
@@ -1300,8 +1249,7 @@ def ClientObituary(targ, attacker, *qwp_extra):
                                 engine.bprint(defs.PRINT_MEDIUM, attacker.netname)
                                 engine.bprint(defs.PRINT_MEDIUM, ' defends ')
                                 engine.bprint(defs.PRINT_MEDIUM, s)
-                                engine.bprint(defs.PRINT_MEDIUM, "'s flag carrier\012")
-                                
+                                engine.bprint(defs.PRINT_MEDIUM, "'s flag carrier\012")                                
                             
                         if ((attacker.steam == teamplay.TEAM_COLOR1) and (head.classname == 'item_flag_team1')) or ((attacker.steam == teamplay.TEAM_COLOR2) and (head.classname == 'item_flag_team2')) and (not flag_radius):
                             #  prevents redundant points awarded
@@ -1312,10 +1260,7 @@ def ClientObituary(targ, attacker, *qwp_extra):
                             engine.bprint(defs.PRINT_MEDIUM, ' defends the ')
                             engine.bprint(defs.PRINT_MEDIUM, s)
                             engine.bprint(defs.PRINT_MEDIUM, ' flag\012')
-                            
-                        head = head.chain
-                        
-                    
+                                                                        
                 #  *XXX* EXPERT CTF 
                 #  End frag determination code.  Now determine death text for
                 #  a member of one team killing a member of the other
@@ -1332,13 +1277,11 @@ def ClientObituary(targ, attacker, *qwp_extra):
                     temp = random.random()
                     if temp < 0.5:
                         deathstring = ' was hooked by '
-                        deathstring2 = '\012'
-                        
+                        deathstring2 = '\012'                        
                     elif temp > 0.5:
                         deathstring = ' was disemboweled by '
                         deathstring2 = '\012'
-                        
-                    
+                                            
                 if rnum == defs.IT_SHOTGUN:
                     deathstring = ' chewed on '
                     deathstring2 = "'s boomstick\012"
@@ -1361,21 +1304,17 @@ def ClientObituary(targ, attacker, *qwp_extra):
                     if targ.health < -40:
                         deathstring = ' was gibbed by '
                         deathstring2 = "'s grenade\012"
-                        
-                    
+                                            
                 if rnum == defs.IT_ROCKET_LAUNCHER:
                     if attacker.items & defs.IT_QUAD:
                         deathstring = ' was destroyed by '
-                        deathstring2 = "'s Quad rocket\012"
-                        
+                        deathstring2 = "'s Quad rocket\012"                        
                     else:
                         deathstring = ' rides '
                         deathstring2 = "'s rocket\012"
                         if targ.health < -40:
                             deathstring = ' was gibbed by '
-                            deathstring2 = "'s rocket\012"
-                            
-                        
+                            deathstring2 = "'s rocket\012"                                                    
                     
                 if rnum == defs.IT_LIGHTNING:
                     deathstring = ' accepts '
@@ -1387,10 +1326,8 @@ def ClientObituary(targ, attacker, *qwp_extra):
                 engine.bprint(defs.PRINT_MEDIUM, targ.netname)
                 engine.bprint(defs.PRINT_MEDIUM, deathstring)
                 engine.bprint(defs.PRINT_MEDIUM, attacker.netname)
-                engine.bprint(defs.PRINT_MEDIUM, deathstring2)
-                
-            return 
-            
+                engine.bprint(defs.PRINT_MEDIUM, deathstring2)                
+            return             
         else:
             targ.logfrag(targ)
             targ.frags -= 1 #  killed self
@@ -1413,8 +1350,7 @@ def ClientObituary(targ, attacker, *qwp_extra):
             elif rnum == -5:
                 if targ.health < -15:
                     engine.bprint(defs.PRINT_MEDIUM, ' burst into flames\012')
-                    return 
-                    
+                    return                     
                 if random.random() < 0.5:
                     engine.bprint(defs.PRINT_MEDIUM, ' turned into hot slag\012')
                 else:
@@ -1444,8 +1380,6 @@ def ClientObituary(targ, attacker, *qwp_extra):
                     engine.bprint(defs.PRINT_MEDIUM, ' became one with Shub-Niggurath\012')
                 if attacker.classname == 'monster_shalrath':
                     engine.bprint(defs.PRINT_MEDIUM, ' was exploded by a Vore\012')
-                if attacker.classname == 'monster_shambler':
-                    engine.bprint(defs.PRINT_MEDIUM, ' was smashed by a Shambler\012')
                 if attacker.classname == 'monster_tarbaby':
                     engine.bprint(defs.PRINT_MEDIUM, ' was slimed by a Spawn\012')
                 if attacker.classname == 'monster_vomit':
@@ -1483,10 +1417,7 @@ def ClientObituary(targ, attacker, *qwp_extra):
                 
             engine.bprint(defs.PRINT_MEDIUM, ' died\012')
             
-        
-    
-
-
+                        
 def qwp_reset_client(*qwp_extra):
     global modelindex_eyes
     global modelindex_player
@@ -1494,6 +1425,7 @@ def qwp_reset_client(*qwp_extra):
     global nextmap
     global intermission_running
     global intermission_exittime
+    
     modelindex_eyes = 0
     modelindex_player = 0
     pregameover = 0
