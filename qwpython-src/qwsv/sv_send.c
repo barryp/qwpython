@@ -618,9 +618,9 @@ void SV_UpdateToReliableMessages (void)
 {
 	int			i, j;
 	client_t *client;
-	// edict_t *ent; FIXME (BBP)
+	edict_t *ent;
 
-// check for changes to be sent over the reliable streams to all clients
+	// check for changes to be sent over the reliable streams to all clients
 	for (i=0, host_client = svs.clients ; i<MAX_CLIENTS ; i++, host_client++)
 	{
 		if (host_client->state != cs_spawned)
@@ -645,22 +645,19 @@ void SV_UpdateToReliableMessages (void)
 		}
 
 		// maxspeed/entgravity changes
-        /* FIXME PYTHON BBP
 		ent = host_client->edict;
 
-		val = GetEdictFieldValue(ent, "gravity");
-		if (val && host_client->entgravity != val->_float) {
-			host_client->entgravity = val->_float;
+		if (host_client->entgravity != ent->v.gravity) {
+			host_client->entgravity = ent->v.gravity;
 			ClientReliableWrite_Begin(host_client, svc_entgravity, 5);
 			ClientReliableWrite_Float(host_client, host_client->entgravity);
 		}
-		val = GetEdictFieldValue(ent, "maxspeed");
-		if (val && host_client->maxspeed != val->_float) {
-			host_client->maxspeed = val->_float;
+
+		if (host_client->maxspeed != ent->v.maxspeed) {
+			host_client->maxspeed = ent->v.maxspeed;
 			ClientReliableWrite_Begin(host_client, svc_maxspeed, 5);
 			ClientReliableWrite_Float(host_client, host_client->maxspeed);
 		}
-        */
 	}
 
 	if (sv.datagram.overflowed)

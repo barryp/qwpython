@@ -819,6 +819,8 @@ static PyObject * entity_getattr(qwp_entity_t *self, char *name)
         case 'g':
             if (!strcmp(name, "goalentity"))
                 return get_entity(self->c_entity->v.goalentity);
+            if (!strcmp(name, "gravity"))
+                return get_py_number(self->c_entity->v.gravity);
             if (!strcmp(name, "groundentity"))
                 return get_entity(self->c_entity->v.groundentity);
             break;
@@ -845,6 +847,8 @@ static PyObject * entity_getattr(qwp_entity_t *self, char *name)
                 return get_py_number(self->c_entity->v.max_health);
             if (!strcmp(name, "maxs"))
                 return create_qwp_vector(self->c_entity->v.maxs);
+            if (!strcmp(name, "maxspeed"))
+                return get_py_number(self->c_entity->v.maxspeed);
             if (!strcmp(name, "message"))
                 return get_string(self->c_entity->v.message);
             if (!strcmp(name, "mins"))
@@ -1162,6 +1166,8 @@ static int entity_setattr(qwp_entity_t *self, char *name, PyObject *value)
         case 'g':
             if (!strcmp(name, "goalentity"))
                 return set_entity(&(self->c_entity->v.goalentity), value);
+            if (!strcmp(name, "gravity"))
+                return set_float(&(self->c_entity->v.gravity), value);
             if (!strcmp(name, "groundentity"))
                 return set_entity(&(self->c_entity->v.groundentity), value);
             break;
@@ -1188,6 +1194,8 @@ static int entity_setattr(qwp_entity_t *self, char *name, PyObject *value)
                 return set_float(&(self->c_entity->v.max_health), value);
             if (!strcmp(name, "maxs"))
                 return set_vector(&(self->c_entity->v.maxs), value);
+            if (!strcmp(name, "maxspeed"))
+                return set_float(&(self->c_entity->v.maxspeed), value);
             if (!strcmp(name, "message"))
                 return set_string(&(self->c_entity->v.message), value);
             if (!strcmp(name, "mins"))

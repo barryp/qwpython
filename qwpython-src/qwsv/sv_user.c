@@ -352,17 +352,10 @@ void SV_Spawn_f (void)
 	ent->v.netname = PyString_FromString(host_client->name);
 
 	host_client->entgravity = 1.0;
-    /* FIXME PYTHON BBP
-	val = GetEdictFieldValue(ent, "gravity");
-	if (val)
-		val->_float = 1.0;
-    */
+	ent->v.gravity = 1.0;
+
 	host_client->maxspeed = sv_maxspeed.value;
-    /* FIXME PYTHON BBP
-	val = GetEdictFieldValue(ent, "maxspeed");
-	if (val)
-		val->_float = sv_maxspeed.value;
-    */
+	ent->v.maxspeed = sv_maxspeed.value;
 
 //
 // force stats to be updated

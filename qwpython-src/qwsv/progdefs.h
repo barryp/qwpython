@@ -119,6 +119,7 @@ typedef struct
     float        frags;
     float        frame;
     int          goalentity;
+	float		 gravity;
     int          groundentity;
     float        health;
     float        ideal_yaw;
@@ -128,6 +129,7 @@ typedef struct
     float        ltime;
     float        max_health;
     vec3_t       maxs;
+	float		 maxspeed;
     PyObject     *message;
     vec3_t       mins;
     PyObject     *model;
