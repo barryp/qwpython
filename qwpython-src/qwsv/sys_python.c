@@ -338,7 +338,7 @@ unsigned short COM_CRC_File(char *path)
 		return 0;
 		}
 
-	PyString_AsStringAndSize(contents, &buf, &len);
+	PyString_AsStringAndSize(contents, (char *) &buf, &len);
 	crc = CRC_Block(buf, len);
 
     Py_DECREF(contents);
@@ -1391,7 +1391,7 @@ void PR_ExecuteProgram(PyObject *func)
         PyErr_Print();
     }
 
-void qwp_global_clearall()
+void qwp_global_clearall(void)
     {
     Py_XDECREF(pr_global_struct->mapname);
     memset(pr_global_struct, 0, sizeof(pr_global_struct));
