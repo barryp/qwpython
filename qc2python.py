@@ -2,11 +2,11 @@
 # QuakeC Tokenizer
 #   Barry Pederson <bpederson@geocities.com>
 #
-# $Id: qc2python.py,v 1.3 2001/02/05 16:19:55 barryp Exp $
+# $Id: qc2python.py,v 1.4 2001/02/05 16:26:04 barryp Exp $
 #
 import os, pprint, string, re, types
 
-translator_info = '$Id: qc2python.py,v 1.3 2001/02/05 16:19:55 barryp Exp $'
+translator_info = '$Id: qc2python.py,v 1.4 2001/02/05 16:26:04 barryp Exp $'[1:-1]
 
 ############ Output Filter ###########################
 class VectorFilter:
