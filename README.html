@@ -28,12 +28,14 @@ li.new { color: #009933}
   <tr> 
     <td class="sidebar" valign="top"> 
       <h2>Docs</h2>
+      <p><a href="docs/changelog.txt">Changelog</a></p>
       <p><a href="docs/devel_notes.txt">Devel Notes</a></p>
       <p><a href="docs/qcbugs.html">QuakeC Bugs</a></p>
       <p><a href="docs/translate.html">Translating QC</a></p>
       <h2>Links</h2>
       <p><a href="http://sourceforge.net/projects/qwpython">SourceForge Project</a></p>
-      <p><a href="http://www.planetquake.com/q2java">Q2Java</a></p>
+      <p><a href="http://www.planetquake.com/q2java">Q2Java</a> - a similar project 
+        that allows Quake2 games to be written in Java instead of C.</p>
     </td>
     <td class="new"> 
       <p>QWPython is a Python-powered QuakeWorld dedicated server in which the 
@@ -156,7 +158,19 @@ li.new { color: #009933}
         stop it you'll either have to use the 'kill' command on Unix, or just 
         close the window under Windows, or use the QuakeWorld 'rcon' command from 
         within a connected QW client console (as in:<code> rcon mypass quit</code>).</p>
-    </td>
+      <h2>Running as a WinNT/Win2k Service</h2>
+      <p>The file ctf_service.py is an example of running a QWPython game as a 
+        service. To install and run, use the commands:</p>
+      <p><code>python ctf_service.py install<br>
+        net start ctfpython</code></p>
+      <p>To stop and remove the service, try:</p>
+      <p><code>net stop ctfpython<br>
+        python ctf_service.py remove</code></p>
+      <p>You can also control the service through the Windows service control 
+        panel. Adapting this to other games besides CTF should be easy - nothing 
+        in the game itself changes, only the ctf_service.py has anything specific 
+        to Windows services in it.</p>
+      </td>
   </tr>
   <tr> 
     <td>
@@ -164,7 +178,7 @@ li.new { color: #009933}
     </td>
     <td class="footer">
       <p>Barry Pederson &lt;<a href="mailto:bpederson@geocities.com">bpederson@geocities.com</a>&gt;<br />
-      $Id: README.html,v 1.5 2001/04/15 16:41:59 barryp Exp $</p>
+      $Id: README.html,v 1.6 2001/04/15 22:55:02 barryp Exp $</p>
     </td>
   </tr>
 </table>
