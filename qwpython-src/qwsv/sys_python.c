@@ -33,6 +33,8 @@ that they don't affect the Python code at all)
     #include <winsock.h>
     #include <conio.h>
     #include <direct.h>
+#else
+	#include <sys/stat.h>
 #endif    
 #include <stdio.h> // for debugging resource loader only
 
@@ -72,7 +74,14 @@ Sys_mkdir
 */
 void Sys_mkdir (char *path)
 {
+#ifdef _WIN32
 	_mkdir(path);
+#else
+	if (mkdir (path, 0777) != -1)
+		return;
+	if (errno != EEXIST)
+		Sys_Error ("mkdir %s: %s",path, strerror(errno)); 
+#endif
 }
 
 
@@ -142,51 +151,6 @@ Sys_ConsoleInput
 */
 char *Sys_ConsoleInput(void)
 	{
-/*
-	static char	asciiChars[256];
-	jmethodID   inputMethod;
-	jstring		js;
-    const jchar *unicodeChars;
-	jsize jStrLen;
-	int i;
-		
-	inputMethod = (*qwjava_env)->GetMethodID(qwjava_env, qwjava_engine_class, "readConsoleInput", "()Ljava/lang/String;");
-	if (CHECK_EXCEPTION())
-		{
-		printf("Couldn't get readConsoleInput() method ID\n");
-		return NULL;
-		}
-		
-	js = (*qwjava_env)->CallObjectMethod(qwjava_env, qwjava_engine, inputMethod);
-	if (CHECK_EXCEPTION())
-		printf("Trouble calling readConsoleInput method\n");
-
-	if (!js)
-		return NULL;
-
-	jStrLen = (*qwjava_env)->GetStringLength(qwjava_env, js);
-	unicodeChars = (*qwjava_env)->GetStringChars(qwjava_env, js, NULL);
-
-	// do a cheapo translation from Unicode to 8-bit chars
-	for (i = 0; (i < jStrLen) && (i < 255); i++)
-		{
-		if (unicodeChars[i] < 256)
-			asciiChars[i] = unicodeChars[i];
-		else
-			asciiChars[i] = '?';
-		}
-	asciiChars[i] = 0;
-
-    (*qwjava_env)->ReleaseStringChars(qwjava_env, js, unicodeChars);
-	CHECK_EXCEPTION();
-
-	(*qwjava_env)->DeleteLocalRef(qwjava_env, js);
-	CHECK_EXCEPTION();
-
-	if (jStrLen > 0)
-		return asciiChars;
-	else
-*/
 		return NULL;
 	}
 	
@@ -214,6 +178,7 @@ void Sys_Printf (char *fmt, ...)
 	else
 		Py_DECREF(result);
 	}
+
 
 /*
 ================

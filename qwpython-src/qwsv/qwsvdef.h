@@ -93,7 +93,7 @@ extern	double		realtime;			// not bounded in any way, changed at
 
 void SV_Error(char *error, ...);
 void SV_Init(quakeparms_t *parms);
-void SV_Init2();
+void SV_Init2(void);
 
 void Con_Printf (char *fmt, ...);
 void Con_DPrintf (char *fmt, ...);

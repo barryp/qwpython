@@ -158,10 +158,10 @@ qboolean	NET_StringToAdr (char *s, netadr_t *a)
 // the IP is NOT one of our interfaces.
 qboolean NET_IsClientLegal(netadr_t *adr)
 {
+#if 0
 	struct sockaddr_in sadr;
 	int newsocket;
 
-#if 0
 	if (adr->ip[0] == 127)
 		return false; // no local connections period
 

@@ -676,8 +676,7 @@ static struct PyMethodDef entity_methods[] =
 
 static void entity_destruct(qwp_entity_t *self)
     {
-    edict_t *ent = self->c_entity;
-
+    // edict_t *ent = self->c_entity;
     // Sys_Printf("Destructing %d, p_entity=%x c_entity=%x\n", NUM_FOR_EDICT(ent), ent->p_entity, ent->p_entity->c_entity);
 
     self->c_entity = NULL;
@@ -1323,7 +1322,7 @@ PyTypeObject QWP_Entity_Type =
 	};
 
 
-void init_qwp_entity_type()
+void init_qwp_entity_type(void)
     {
 	QWP_Entity_Type.ob_type = &PyType_Type;  // Fix for MSVC problem
     }
@@ -1363,7 +1362,7 @@ PyObject * create_qwp_entity(struct edict_s *ent)
  * Called before a level starts, to clear out Python entities
  * from the previous level
  */
-void qwp_entity_clearall()
+void qwp_entity_clearall(void)
     {
     int i;
 

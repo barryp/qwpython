@@ -48,9 +48,9 @@ typedef struct qwp_entity_s
     struct edict_s  *c_entity;
 	} qwp_entity_t;
 
-void init_qwp_entity_type();
+void init_qwp_entity_type(void);
 PyObject * create_qwp_entity(struct edict_s *e);
-void qwp_entity_clearall();
+void qwp_entity_clearall(void);
 
 /* Vector Stuff */
 extern PyTypeObject QWP_Vector_Type;
@@ -63,7 +63,7 @@ typedef struct qwp_vector_s
     } qwp_vector_t;
 
 #define IS_SCALAR(v) (((v)->flags & 8) != 0)
-void init_qwp_vector_type();
+void init_qwp_vector_type(void);
 PyObject * create_qwp_vector(vec3_t source);
 PyObject * qwp_vector_new(PyObject *self, PyObject *args);
 #endif

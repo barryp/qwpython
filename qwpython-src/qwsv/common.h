@@ -178,10 +178,7 @@ void COM_Init (void);
 void COM_InitArgv (int argc, char **argv);
 void Init_Py_Argv(void);
 
-char *COM_SkipPath (char *pathname);
-void COM_StripExtension (char *in, char *out);
 void COM_FileBase (char *in, char *out);
-void COM_DefaultExtension (char *path, char *extension);
 
 char	*va(char *format, ...);
 // does a varargs printf into a temp buffer
@@ -193,7 +190,6 @@ extern int com_filesize;
 
 extern	char	com_gamedir[MAX_OSPATH];
 
-void COM_WriteFile (char *filename, void *data, int len);
 int COM_FOpenFile (char *filename, FILE **file);
 void COM_CloseFile (FILE *h);
 int COM_FileExists(char *filename); //BBP
@@ -202,7 +198,6 @@ unsigned short COM_CRC_File(char *path);
 byte *COM_LoadFile (char *path, int useHunk);
 byte *COM_LoadStackFile (char *path, void *buffer, int bufsize);
 byte *COM_LoadHunkFile (char *path);
-void COM_CreatePath (char *path);
 void COM_Gamedir (char *dir);
 
 extern	struct cvar_s	registered;

@@ -213,11 +213,11 @@ static PyObject * vector_pos(qwp_vector_t *v)
 
 
 // print is broken somehow, using repr instead works
-static int vector_print(qwp_vector_t *self, FILE *fp, int flags)
-    {
-	fprintf(fp, "(%.12g, %.12g, %.12g)", self->v[0], self->v[1], self->v[2]);
-	return 0;
-    }
+//static int vector_print(qwp_vector_t *self, FILE *fp, int flags)
+//    {
+//	fprintf(fp, "(%.12g, %.12g, %.12g)", self->v[0], self->v[1], self->v[2]);
+//	return 0;
+//    }
 
 
 // merge two vectors together, using the values from the first one, if the
@@ -337,8 +337,6 @@ static struct PyMethodDef vector_methods[] =
 
 static PyObject * vector_getattr(qwp_vector_t *self, char *name)
 	{
-	PyObject *result = NULL;
-
     if (!strcmp(name, "x") || !strcmp(name, "pitch"))
         return PyFloat_FromDouble(self->v[0]);
 
@@ -373,7 +371,7 @@ PyTypeObject QWP_Vector_Type =
 	};
 
 
-void init_qwp_vector_type()
+void init_qwp_vector_type(void)
     {
 	QWP_Vector_Type.ob_type = &PyType_Type;  // Fix for MSVC problem
     }

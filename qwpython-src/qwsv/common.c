@@ -877,58 +877,6 @@ void SZ_Print (sizebuf_t *buf, char *data)
 
 /*
 ============
-COM_SkipPath
-============
-*/
-char *COM_SkipPath (char *pathname)
-{
-	char	*last;
-	
-	last = pathname;
-	while (*pathname)
-	{
-		if (*pathname=='/')
-			last = pathname+1;
-		pathname++;
-	}
-	return last;
-}
-
-/*
-============
-COM_StripExtension
-============
-*/
-void COM_StripExtension (char *in, char *out)
-{
-	while (*in && *in != '.')
-		*out++ = *in++;
-	*out = 0;
-}
-
-/*
-============
-COM_FileExtension
-============
-*/
-char *COM_FileExtension (char *in)
-{
-	static char exten[8];
-	int		i;
-
-	while (*in && *in != '.')
-		in++;
-	if (!*in)
-		return "";
-	in++;
-	for (i=0 ; i<7 && *in ; i++,in++)
-		exten[i] = *in;
-	exten[i] = 0;
-	return exten;
-}
-
-/*
-============
 COM_FileBase
 ============
 */
@@ -955,33 +903,10 @@ void COM_FileBase (char *in, char *out)
 }
 
 
-/*
-==================
-COM_DefaultExtension
-==================
-*/
-void COM_DefaultExtension (char *path, char *extension)
-{
-	char    *src;
-//
-// if path doesn't have a .EXT, append extension
-// (extension should include the .)
-//
-	src = path + strlen(path) - 1;
-
-	while (*src != '/' && src != path)
-	{
-		if (*src == '.')
-			return;                 // it has an extension
-		src--;
-	}
-
-	strcat (path, extension);
-}
 
 //============================================================================
 
-char		com_token[1024];
+char	com_token[1024];
 int		com_argc;
 char	**com_argv;
 
@@ -1209,7 +1134,7 @@ void COM_Init (void)
 	Cvar_RegisterVariable (&registered);
 	Cmd_AddCommand ("path", COM_Path_f);
 
-	COM_InitFilesystem ();
+//	COM_InitFilesystem ();
 }
 
 
@@ -1324,20 +1249,6 @@ int COM_filelength (FILE *f)
 	return end;
 }
 
-int COM_FileOpenRead (char *path, FILE **hndl)
-{
-	FILE	*f;
-
-	f = fopen(path, "rb");
-	if (!f)
-	{
-		*hndl = NULL;
-		return -1;
-	}
-	*hndl = f;
-	
-	return COM_filelength(f);
-}
 
 /*
 ============
@@ -1361,91 +1272,9 @@ void COM_Path_f (void)
 	}
 }
 
-/*
-============
-COM_WriteFile
-
-The filename will be prefixed by the current game directory
-============
-*/
-void COM_WriteFile (char *filename, void *data, int len)
-{
-	FILE	*f;
-	char	name[MAX_OSPATH];
-	
-	sprintf (name, "%s/%s", com_gamedir, filename);
-	
-	f = fopen (name, "wb");
-	if (!f) {
-		Sys_mkdir(com_gamedir);
-		f = fopen (name, "wb");
-		if (!f)
-			Sys_Error ("Error opening %s", filename);
-	}
-	
-	Sys_Printf ("COM_WriteFile: %s\n", name);
-	fwrite (data, 1, len, f);
-	fclose (f);
-}
 
 
-/*
-============
-COM_CreatePath
 
-Only used for CopyFile and download
-============
-*/
-void	COM_CreatePath (char *path)
-{
-	char	*ofs;
-	
-	for (ofs = path+1 ; *ofs ; ofs++)
-	{
-		if (*ofs == '/')
-		{	// create the directory
-			*ofs = 0;
-			Sys_mkdir (path);
-			*ofs = '/';
-		}
-	}
-}
-
-
-/*
-===========
-COM_CopyFile
-
-Copies a file over from the net to the local cache, creating any directories
-needed.  This is for the convenience of developers using ISDN from home.
-===========
-*/
-void COM_CopyFile (char *netpath, char *cachepath)
-{
-	FILE	*in, *out;
-	int		remaining, count;
-	char	buf[4096];
-	
-	remaining = COM_FileOpenRead (netpath, &in);		
-	COM_CreatePath (cachepath);	// create directories up to the cache file
-	out = fopen(cachepath, "wb");
-	if (!out)
-		Sys_Error ("Error opening %s", cachepath);
-	
-	while (remaining)
-	{
-		if (remaining < sizeof(buf))
-			count = remaining;
-		else
-			count = sizeof(buf);
-		fread (buf, 1, count, in);
-		fwrite (buf, 1, count, out);
-		remaining -= count;
-	}
-
-	fclose (in);
-	fclose (out);
-}
 
 /*
 ===========
@@ -1513,22 +1342,6 @@ int COM_FOpenFile (char *filename, FILE **file)
 	*file = NULL;
 	com_filesize = -1;
 	return -1;
-}
-
-
-/*
-=================
-COM_LoadPackFile
-
-Takes an explicit (not game tree related) path to a pak file.
-
-Loads the header and directory, adding the files at the beginning
-of the list so they override previous pack files.
-=================
-*/
-pack_t *COM_LoadPackFile (char *packfile)
-{
-	return NULL; // (BBP no longer needed)
 }
 
 
