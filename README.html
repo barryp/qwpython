@@ -28,6 +28,7 @@ ul.dirtree { font-family: "Courier New", Courier, mono;}
       <h2>Docs</h2>
       <p><a href="docs/devel_notes.txt">Devel Notes</a></p>
       <p><a href="docs/qcbugs.html">QuakeC Bugs</a></p>
+      <p><a href="docs/translate.html">Translating QC</a></p>
       <h2>Links</h2>
       <p><a href="http://sourceforge.net/projects/qwpython">SourceForge Project</a></p>
       <p><a href="http://www.planetquake.com/q2java">Q2Java</a></p>
@@ -92,9 +93,9 @@ ul.dirtree { font-family: "Courier New", Courier, mono;}
         and/or <code>ctf.py</code> files to look somewhere else for the game's 
         .pak files.</p>
       <h2>Building the native code</h2>
-      <p><i>(Windows distributions may contain pre-built binaries allowing you 
-        to skip this. But if you have VisualC++ you can build your own binary 
-        with this step.)</i></p>
+      <p><i>(Unix users need to follow this step. Windows distributions may contain 
+        pre-built binaries allowing you to skip this, but if you have VisualC++ 
+        you can follow this step also to build your own binary.)</i></p>
       <p>Change to the qwpython directory and run this command:</p>
       <p><code>python setup.py install --install-lib .</code></p>
       <p>This will compile the native-code part of QWPython (the actual QuakeWorld 
@@ -125,7 +126,11 @@ ul.dirtree { font-family: "Courier New", Courier, mono;}
       </ul>
       <p>You may remove the 'build' directory after this is finished. </p>
       <h2>Running a Game</h2>
-      <p>You might also want to use a standard QuakeWorld 'server.cfg' file (usually 
+      <p>QWPython comes with pre-translated versions of Deathmatch and CTF, which 
+        can be found in the <code>py_dm</code> and <code>py_ctf</code> directories. 
+        If you want to translate your own QC code, be sure to read the <a href="docs/translate.html">translator 
+        notes</a>. </p>
+      <p>You might want to use a standard QuakeWorld 'server.cfg' file (usually 
         in the same place as your .PAK files), that looks something like:</p>
       <p><code>deathmatch 1<br>
         hostname &quot;Python-Powered Deathmatch&quot;<br>
@@ -149,7 +154,7 @@ ul.dirtree { font-family: "Courier New", Courier, mono;}
     <td>
       <div align="center"><a href="http://www.python.org"><img src="docs/PythonPowered.gif" width="110" height="44" border="0" alt="Python Powered"></a></div>
     </td>
-    <td align="right"><font size="-1"><i>$Id: README.html,v 1.2 2001/02/05 16:54:22 barryp Exp $</i></font></td>
+    <td align="right"><font size="-1"><i>$Id: README.html,v 1.3 2001/02/05 17:15:36 barryp Exp $</i></font></td>
   </tr>
 </table>
 </body>
