@@ -1,6 +1,8 @@
 #
 # Python code that somewhat mimics the QuakeC environment
 #
+# Barry Pederson <bpederson@geocities.com>
+#
 import re, string, traceback
 from string import join
 from qwpython.qwsv import engine, Vector
@@ -67,7 +69,7 @@ class QCGlobals:
         ent.makestatic()                
                     
     def makevectors(self, angles):
-        (self.v_forward, self.v_up, self.v_right) = angles.to_vectors()                
+        (self.v_forward, self.v_right, self.v_up) = angles.to_vectors()                
 
     def nextent(self, ent):
         r = ent.next_entity()
