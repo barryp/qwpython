@@ -186,13 +186,7 @@ char	*va(char *format, ...);
 
 //============================================================================
 
-extern int com_filesize;
-
 extern	char	com_gamedir[MAX_OSPATH];
-
-int COM_FOpenFile (char *filename, FILE **file);
-void COM_CloseFile (FILE *h);
-int COM_FileExists(char *filename); //BBP
 
 unsigned short COM_CRC_File(char *path);
 byte *COM_LoadFile (char *path, int useHunk);

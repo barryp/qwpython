@@ -37,6 +37,33 @@ extern int fp_messages, fp_persecond, fp_secondsdead;
 extern char fp_msg[];
 extern cvar_t pausable;
 
+
+
+/*
+  Close any existing download sessions, harmless 
+  to call if no download is in progress
+*/
+void close_download(client_t *c)
+{
+	if (c->download)
+	{
+		Py_DECREF(c->download);
+		c->download = NULL;
+	}
+
+	if (c->download_name)
+	{
+		Py_DECREF(c->download_name);
+		c->download_name = NULL;
+	}
+
+	c->downloadcount = 0;
+	c->downloadsize = 0;
+	c->download_ptr = NULL;
+}
+
+
+
 /*
 ============================================================
 
@@ -516,7 +543,6 @@ SV_NextDownload_f
 */
 void SV_NextDownload_f (void)
 {
-	byte	buffer[1024];
 	int		r;
 	int		percent;
 	int		size;
@@ -527,25 +553,25 @@ void SV_NextDownload_f (void)
 	r = host_client->downloadsize - host_client->downloadcount;
 	if (r > 768)
 		r = 768;
-	r = fread (buffer, 1, r, host_client->download);
-	ClientReliableWrite_Begin (host_client, svc_download, 6+r);
-	ClientReliableWrite_Short (host_client, r);
+
+	ClientReliableWrite_Begin(host_client, svc_download, 6+r);
+	ClientReliableWrite_Short(host_client, r);
 
 	host_client->downloadcount += r;
 	size = host_client->downloadsize;
 	if (!size)
 		size = 1;
 	percent = host_client->downloadcount*100/size;
-	ClientReliableWrite_Byte (host_client, percent);
-	ClientReliableWrite_SZ (host_client, buffer, r);
 
-	if (host_client->downloadcount != host_client->downloadsize)
-		return;
+	ClientReliableWrite_Byte(host_client, percent);
+	ClientReliableWrite_SZ(host_client, host_client->download_ptr, r);
 
-	fclose (host_client->download);
-	host_client->download = NULL;
+	host_client->download_ptr += r;
 
+	if (host_client->downloadcount >= host_client->downloadsize)
+		close_download(host_client);
 }
+
 
 void OutofBandPrintf(netadr_t where, char *fmt, ...)
 {
@@ -642,16 +668,19 @@ SV_BeginDownload_f
 void SV_BeginDownload_f(void)
 {
 	char	*name;
+	int j;
+	client_t *other_client;
+
 	extern	cvar_t	allow_download;
 	extern	cvar_t	allow_download_skins;
 	extern	cvar_t	allow_download_models;
 	extern	cvar_t	allow_download_sounds;
 	extern	cvar_t	allow_download_maps;
-	extern	int		file_from_pak; // ZOID did file come from pak?
+
 
 	name = Cmd_Argv(1);
-// hacked by zoid to allow more conrol over download
-		// first off, no .. or global allow check
+	// hacked by zoid to allow more conrol over download
+	// first off, no .. or global allow check
 	if (strstr (name, "..") || !allow_download.value
 		// leading dot is no good
 		|| *name == '.' 
@@ -667,39 +696,51 @@ void SV_BeginDownload_f(void)
 		|| (strncmp(name, "maps/", 6) == 0 && !allow_download_maps.value)
 		// MUST be in a subdirectory	
 		|| !strstr (name, "/") )	
-	{	// don't allow anything with .. path
+	{
 		ClientReliableWrite_Begin (host_client, svc_download, 4);
 		ClientReliableWrite_Short (host_client, -1);
 		ClientReliableWrite_Byte (host_client, 0);
 		return;
 	}
 
-	if (host_client->download) {
-		fclose (host_client->download);
-		host_client->download = NULL;
-	}
+	// close any existing downloads
+	close_download(host_client);
 
-	// lowercase name (needed for casesen file systems)
+	// lowercase name (needed for case-sensitive file systems)
+	// and make a Python version
 	{
 		char *p;
 
 		for (p = name; *p; p++)
 			*p = (char)tolower(*p);
 	}
+	host_client->download_name = PyString_FromString(name);
 
-
-	host_client->downloadsize = COM_FOpenFile (name, &host_client->download);
-	host_client->downloadcount = 0;
-
-	if (!host_client->download
-		// special check for maps, if it came from a pak file, don't allow
-		// download  ZOID
-		|| (strncmp(name, "maps/", 5) == 0 && file_from_pak))
+	// Check if another client is already downloading the same thing,
+	// and if so, share it
+	for (j = 0, other_client = svs.clients; j < MAX_CLIENTS; j++, other_client++)
 	{
-		if (host_client->download) {
-			fclose(host_client->download);
-			host_client->download = NULL;
+		if (!other_client->download)
+			continue;
+
+		if (!PyObject_Compare(host_client->download_name, other_client->download_name))
+		{
+			host_client->download = other_client->download;
+			Py_INCREF(host_client->download);
+			break;
 		}
+
+	}
+
+	// if we didn't find a copy to share, load a new one
+	if (!(host_client->download))
+		host_client->download = Sys_ReadResource(name);
+	
+	// if we still don't have something, then report an error back
+	// to the client
+	if (!host_client->download)
+	{
+		close_download(host_client);
 
 		Sys_Printf ("Couldn't download %s to %s\n", name, host_client->name);
 		ClientReliableWrite_Begin (host_client, svc_download, 4);
@@ -707,6 +748,10 @@ void SV_BeginDownload_f(void)
 		ClientReliableWrite_Byte (host_client, 0);
 		return;
 	}
+
+	// Get ready to start downloading
+	PyString_AsStringAndSize(host_client->download, &(host_client->download_ptr), &(host_client->downloadsize));
+	host_client->downloadcount = 0;
 
 	SV_NextDownload_f ();
 	Sys_Printf ("Downloading %s to %s\n", name, host_client->name);

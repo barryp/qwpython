@@ -321,7 +321,7 @@ void SV_Map_f (void)
 
 	// check to make sure the level exists
 	sprintf (expanded, "maps/%s.bsp", level);
-	if (!COM_FileExists(expanded))
+	if (!Sys_ResourceExists(expanded))
 	{
 		Con_Printf ("Can't find %s\n", expanded);
 		return;
@@ -793,17 +793,24 @@ void SV_Snap (int uid)
 		
 	for (i=0 ; i<=99 ; i++) 
 	{ 
+		FILE	*f;
 		pcxname[strlen(pcxname) - 6] = i/10 + '0'; 
 		pcxname[strlen(pcxname) - 5] = i%10 + '0'; 
 		sprintf (checkname, "%s/snap/%s", gamedirfile, pcxname);
-		if (Sys_FileTime(checkname) == -1)
+
+		f = fopen(checkname, "rb");
+		if (f)
+			fclose(f);
+		else
 			break;	// file doesn't exist
 	} 
+
 	if (i==100) 
 	{
 		Con_Printf ("Snap: Couldn't create a file, clean some out.\n"); 
 		return;
 	}
+
 	strcpy(cl->uploadfn, checkname);
 
 	memcpy(&cl->snap_from, &net_from, sizeof(net_from));

@@ -208,11 +208,8 @@ void SV_DropClient (client_t *drop)
 	else
 		Con_Printf ("Client %s removed\n",drop->name);
 
-	if (drop->download)
-	{
-		fclose (drop->download);
-		drop->download = NULL;
-	}
+	close_download(drop);
+
 	if (drop->upload)
 	{
 		fclose (drop->upload);

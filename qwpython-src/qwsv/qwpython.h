@@ -22,8 +22,10 @@ int set_string(PyObject **sp, PyObject *value);
 int set_vector(vec3_t *vp, PyObject *value);
 
 
-
 /* Engine Stuff */
+int Sys_ResourceExists(char *path); 
+PyObject * Sys_ReadResource(const char *path);
+
 typedef struct
 	{
 	PyObject_HEAD
@@ -37,6 +39,7 @@ typedef struct
 	} qwp_engine_t;
 
 extern qwp_engine_t *qwp_engine;
+
 
 /* Entity Stuff */
 extern PyTypeObject QWP_Entity_Type;
@@ -52,6 +55,7 @@ void init_qwp_entity_type(void);
 PyObject * create_qwp_entity(struct edict_s *e);
 void qwp_entity_clearall(void);
 
+
 /* Vector Stuff */
 extern PyTypeObject QWP_Vector_Type;
 #define qwp_vector_check(op) ((op)->ob_type == &QWP_Vector_Type)
@@ -66,4 +70,5 @@ typedef struct qwp_vector_s
 void init_qwp_vector_type(void);
 PyObject * create_qwp_vector(vec3_t source);
 PyObject * qwp_vector_new(PyObject *self, PyObject *args);
+
 #endif

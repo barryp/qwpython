@@ -186,7 +186,7 @@ qboolean NET_GetPacket (void)
 		}
 
 
-		Sys_Error ("NET_GetPacket: %s", strerror(my_errno));
+		Sys_Error ("NET_GetPacket: %d %s", my_errno, strerror(my_errno));
 	}
 
 	net_message.cursize = ret;

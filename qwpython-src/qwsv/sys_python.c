@@ -41,31 +41,11 @@ that they don't affect the Python code at all)
 #include "qwsvdef.h"
 cvar_t	sys_nostdout = {"sys_nostdout","0"};
 int engine_run = 1;
-
+char error_text[2048] = "";
 
 qwp_engine_t *qwp_engine;
 static PyObject *module_dict;
 
-
-
-/*
-================
-Sys_FileTime
-================
-*/
-int	Sys_FileTime (char *path)
-{
-	FILE	*f;
-	
-	f = fopen(path, "rb");
-	if (f)
-	{
-		fclose(f);
-		return 1;
-	}
-	
-	return -1;
-}
 
 /*
 ================
@@ -90,18 +70,16 @@ void Sys_mkdir (char *path)
 Sys_Error
 ================
 */
-void Sys_Error (char *error, ...)
+void Sys_Error(char *error, ...)
 	{
 	va_list		argptr;
-	char		text[1024];
 
-	va_start (argptr,error);
-	vsprintf (text, error,argptr);
+	va_start (argptr, error);
+	vsprintf (error_text, error, argptr);
 	va_end (argptr);
 
-//    MessageBox(NULL, text, "Error", 0 /* MB_OK */ );
+	printf("Sys_Error: %s\n", error_text);
 	engine_run = 0;
-	PyErr_SetString(PyExc_RuntimeError, text);
 	}
 
 
@@ -142,8 +120,6 @@ double Sys_DoubleTime (void)
 }
 
 
-
-
 /*
 ================
 Sys_ConsoleInput
@@ -154,8 +130,6 @@ char *Sys_ConsoleInput(void)
 		return NULL;
 	}
 	
-
-
 
 /*
 ================
@@ -173,6 +147,12 @@ void Sys_Printf (char *fmt, ...)
 	va_end (argptr);
 
 	result = PyObject_CallMethod(qwp_engine->out, "write", "s", text);
+	if (!result)
+		PyErr_Clear();
+	else
+		Py_DECREF(result);
+
+	result = PyObject_CallMethod(qwp_engine->out, "flush", NULL);
 	if (!result)
 		PyErr_Clear();
 	else
@@ -205,6 +185,7 @@ void Sys_Init (void)
 	Cvar_RegisterVariable (&sys_nostdout);
 }
 
+
 /*
 ==================
 main
@@ -216,11 +197,8 @@ quakeparms_t	parms;
 
 static void engine_init(void)
 	{
-//	static	char	cwd[1024];
 	int				t;
 
-//	COM_InitArgv (argc, argv);
-	
 	parms.argc = com_argc;
 	parms.argv = com_argv;
 
@@ -310,8 +288,17 @@ static PyObject * qw_run(PyObject *self, PyObject *args)
 	SV_Shutdown();
 	free(parms.membase);
 
-    Py_INCREF(Py_None);
-	return Py_None;
+
+	if (error_text[0])
+		{
+		PyErr_SetString(PyExc_RuntimeError, error_text);
+		return NULL;
+		}
+	else
+		{
+		Py_INCREF(Py_None);
+		return Py_None;
+		}
 	}
 
 
@@ -347,11 +334,51 @@ unsigned short COM_CRC_File(char *path)
 
 
 /*
+ Find out if a named resource exists
+ */
+int Sys_ResourceExists(char *path)
+	{
+	PyObject *result;
+	int rval = 0;
+
+	result = PyObject_CallMethod(qwp_engine->loader, "has_key", "s", path);
+	if (!result)
+		{
+		PyErr_Clear();
+		return 0;
+		}
+	
+	rval = PyObject_IsTrue(result);
+	Py_DECREF(result);
+	return rval;
+	}
+
+
+/*
+ Read a named resource, return as a Python string
+ return NULL if not found
+ */
+PyObject * Sys_ReadResource(const char *path)
+	{
+	PyObject *result;
+
+	result = PyObject_CallMethod(qwp_engine->loader, "read", "s", path);
+	if (result)
+		return result;
+	else
+		{
+		PyErr_Clear();
+		return NULL;
+		}
+	}
+
+
+/*
 ============
 COM_LoadFile
 
-Filename are reletive to the quake directory.
-Allways appends a 0 byte to the loaded data.
+Filename are relative to the quake directory.
+Always appends a 0 byte to the loaded data.
 ============
 */
 byte	*loadbuf;
@@ -365,17 +392,12 @@ byte *COM_LoadFile (char *path, int usehunk)
 	byte *buf;
 	char base[32];
 
-	result = PyObject_CallMethod(qwp_engine->loader, "read", "s", path);
+	result = Sys_ReadResource(path);
 	if (!result)
-		{
-		PyErr_Clear();
 		return NULL;
-		}
 
 	PyString_AsStringAndSize(result, &p, &len);
 
-	buf = NULL;	// quiet compiler warning
-	
 	// extract the filename base name for hunk tag
 	COM_FileBase (path, base);
 	
@@ -391,18 +413,23 @@ byte *COM_LoadFile (char *path, int usehunk)
 			buf = loadbuf;
 		}
 	else
-		Sys_Error ("COM_LoadFile: bad usehunk");
+		{
+		Sys_Error("COM_LoadFile: bad usehunk");
+		buf = NULL;
+		}
 
 	if (!buf)
-		Sys_Error ("COM_LoadFile: not enough space for %s", path);
-
-	memcpy(buf, p, len);
-	((byte *)buf)[len] = 0;
+		Sys_Error("COM_LoadFile: not enough space for %s", path);
+	else
+		{
+		memcpy(buf, p, len);
+		((byte *)buf)[len] = 0;
+		}
 
 	Py_DECREF(result);
-	com_filesize = len;
 	return buf;
 	}
+
 
 byte *COM_LoadHunkFile (char *path)
 {
@@ -422,22 +449,6 @@ byte *COM_LoadStackFile (char *path, void *buffer, int bufsize)
 	return buf;
 }
 
-int COM_FileExists(char *path)
-	{
-	PyObject *result;
-	int rval = 0;
-
-	result = PyObject_CallMethod(qwp_engine->loader, "has_key", "s", path);
-	if (!result)
-		{
-		PyErr_Clear();
-		return 0;
-		}
-	
-	rval = PyObject_IsTrue(result);
-	Py_DECREF(result);
-	return rval;
-	}
 
 /******** QC Globals *********/
 
@@ -1354,19 +1365,20 @@ static void init_qwp_engine(void)
 	}
 
 
-/********* Module ***************/
+/********* qwsv Module ***************/
 
-static struct PyMethodDef qw_methods[] =
+static struct PyMethodDef qwsv_methods[] =
 	{
         {"Vector", qwp_vector_new, 1},
 		{NULL, NULL}
 	};
 
+
 void initqwsv(void)
 	{
 	PyObject *m;
 
-	m = Py_InitModule("qwsv", qw_methods);
+	m = Py_InitModule("qwsv", qwsv_methods);
 	module_dict = PyModule_GetDict(m);
 	Py_INCREF(module_dict);
 
@@ -1382,6 +1394,7 @@ void initqwsv(void)
     engine_init();
 	}
 
+
 void PR_ExecuteProgram(PyObject *func)
     {
     PyObject *result = PyObject_CallFunction(func, NULL);
@@ -1390,6 +1403,7 @@ void PR_ExecuteProgram(PyObject *func)
     else
         PyErr_Print();
     }
+
 
 void qwp_global_clearall(void)
     {

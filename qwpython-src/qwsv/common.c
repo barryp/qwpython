@@ -44,10 +44,6 @@ qboolean	com_modified;	// set true if using non-id files
 
 qboolean		msg_suppress_1 = 0;
 
-void COM_InitFilesystem (void);
-void COM_Path_f (void);
-
-
 // if a packfile directory differs from this, it is assumed to be hacked
 #define	PAK0_COUNT		339
 #define	PAK0_CRC		52883
@@ -1132,9 +1128,6 @@ void COM_Init (void)
 	}
 
 	Cvar_RegisterVariable (&registered);
-	Cmd_AddCommand ("path", COM_Path_f);
-
-//	COM_InitFilesystem ();
 }
 
 
@@ -1179,183 +1172,8 @@ QUAKE FILESYSTEM
 =============================================================================
 */
 
-int	com_filesize;
-
-
-//
-// in memory
-//
-
-typedef struct
-{
-	char	name[MAX_QPATH];
-	int		filepos, filelen;
-} packfile_t;
-
-typedef struct pack_s
-{
-	char	filename[MAX_OSPATH];
-	FILE	*handle;
-	int		numfiles;
-	packfile_t	*files;
-} pack_t;
-
-//
-// on disk
-//
-typedef struct
-{
-	char	name[56];
-	int		filepos, filelen;
-} dpackfile_t;
-
-typedef struct
-{
-	char	id[4];
-	int		dirofs;
-	int		dirlen;
-} dpackheader_t;
-
-#define	MAX_FILES_IN_PACK	2048
-
 char	com_gamedir[MAX_OSPATH];
-char	com_basedir[MAX_OSPATH];
 
-typedef struct searchpath_s
-{
-	char	filename[MAX_OSPATH];
-	pack_t	*pack;		// only one of filename / pack will be used
-	struct searchpath_s *next;
-} searchpath_t;
-
-searchpath_t	*com_searchpaths;
-searchpath_t	*com_base_searchpaths;	// without gamedirs
-
-/*
-================
-COM_filelength
-================
-*/
-int COM_filelength (FILE *f)
-{
-	int		pos;
-	int		end;
-
-	pos = ftell (f);
-	fseek (f, 0, SEEK_END);
-	end = ftell (f);
-	fseek (f, pos, SEEK_SET);
-
-	return end;
-}
-
-
-/*
-============
-COM_Path_f
-
-============
-*/
-void COM_Path_f (void)
-{
-	searchpath_t	*s;
-	
-	Con_Printf ("Current search path:\n");
-	for (s=com_searchpaths ; s ; s=s->next)
-	{
-		if (s == com_base_searchpaths)
-			Con_Printf ("----------\n");
-		if (s->pack)
-			Con_Printf ("%s (%i files)\n", s->pack->filename, s->pack->numfiles);
-		else
-			Con_Printf ("%s\n", s->filename);
-	}
-}
-
-
-
-
-
-/*
-===========
-COM_FindFile
-
-Finds the file in the search path.
-Sets com_filesize and one of handle or file
-===========
-*/
-int file_from_pak; // global indicating file came from pack file ZOID
-
-int COM_FOpenFile (char *filename, FILE **file)
-{
-	searchpath_t	*search;
-	char		netpath[MAX_OSPATH];
-	pack_t		*pak;
-	int			i;
-	int			findtime;
-
-	file_from_pak = 0;
-		
-//
-// search through the path, one element at a time
-//
-	for (search = com_searchpaths ; search ; search = search->next)
-	{
-	// is the element a pak file?
-		if (search->pack)
-		{
-		// look through all the pak file elements
-			pak = search->pack;
-			for (i=0 ; i<pak->numfiles ; i++)
-				if (!strcmp (pak->files[i].name, filename))
-				{	// found it!
-					Sys_Printf ("PackFile: %s : %s\n",pak->filename, filename);
-				// open a new file on the pakfile
-					*file = fopen (pak->filename, "rb");
-					if (!*file)
-						Sys_Error ("Couldn't reopen %s", pak->filename);	
-					fseek (*file, pak->files[i].filepos, SEEK_SET);
-					com_filesize = pak->files[i].filelen;
-					file_from_pak = 1;
-					return com_filesize;
-				}
-		}
-		else
-		{		
-	        // check a file in the directory tree			
-			sprintf (netpath, "%s/%s",search->filename, filename);
-			
-			findtime = Sys_FileTime (netpath);
-			if (findtime == -1)
-				continue;
-				
-			Sys_Printf ("FindFile: %s\n",netpath);
-
-			*file = fopen (netpath, "rb");
-			return COM_filelength (*file);
-		}
-		
-	}
-	
-	Sys_Printf ("FindFile: can't find %s\n", filename);
-	
-	*file = NULL;
-	com_filesize = -1;
-	return -1;
-}
-
-
-/*
-================
-COM_AddGameDirectory
-
-Sets com_gamedir, adds the directory to the head of the path,
-then loads and adds pak1.pak pak2.pak ... 
-================
-*/
-void COM_AddGameDirectory (char *dir)
-{
-}
 
 /*
 ================
@@ -1367,36 +1185,6 @@ Sets the gamedir and path to a different directory.
 void COM_Gamedir (char *dir)
 {
 }
-
-/*
-================
-COM_InitFilesystem
-================
-*/
-void COM_InitFilesystem (void)
-{
-	int		i;
-
-//
-// -basedir <path>
-// Overrides the system supplied base directory (under id1)
-//
-	i = COM_CheckParm ("-basedir");
-	if (i && i < com_argc-1)
-		strcpy (com_basedir, com_argv[i+1]);
-	else
-		strcpy (com_basedir, host_parms.basedir);
-
-//
-// start up with id1 by default
-//
-	COM_AddGameDirectory (va("%s/id1", com_basedir) );
-	COM_AddGameDirectory (va("%s/qw", com_basedir) );
-
-	// any set gamedirs will be freed up to here
-	com_base_searchpaths = com_searchpaths;
-}
-
 
 
 /*

@@ -159,10 +159,10 @@ typedef struct client_s
 	double			connection_started;	// or time of disconnect for zombies
 	qboolean		send_message;		// set on frames a datagram arived on
 
-// spawn parms are carried from level to level
+	// spawn parms are carried from level to level
 	float			spawn_parms[NUM_SPAWN_PARMS];
 
-// client known data for deltas	
+	// client known data for deltas	
 	int				old_frags;
 	
 	int				stats[MAX_CL_STATS];
@@ -170,14 +170,16 @@ typedef struct client_s
 
 	client_frame_t	frames[UPDATE_BACKUP];	// updates can be deltad from here
 
-	FILE			*download;			// file being downloaded
+	PyObject		*download;			// Python String being downloaded
+	PyObject		*download_name;		// name of the item being downloaded
 	int				downloadsize;		// total bytes
 	int				downloadcount;		// bytes sent
+	char			*download_ptr;		// current byte
 
 	int				spec_track;			// entnum of player tracking
 
 	double			whensaid[10];       // JACK: For floodprots
- 	int			whensaidhead;       // Head value for floodprots
+ 	int				whensaidhead;       // Head value for floodprots
  	double			lockedtill;
 
 	qboolean		upgradewarn;		// did we warn him?
@@ -420,6 +422,7 @@ void SV_FindModelNumbers (void);
 void SV_ExecuteClientMessage (client_t *cl);
 void SV_UserInit (void);
 void SV_TogglePause (const char *msg);
+void close_download(client_t *c);
 
 
 //
