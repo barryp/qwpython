@@ -246,10 +246,6 @@ SOURCE=..\pmove.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\pr_comp.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\progdefs.h
 # End Source File
 # Begin Source File
