@@ -1,0 +1,626 @@
+# Microsoft Developer Studio Generated Dependency File, included by qwsv.mak
+
+..\client\cmd.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\quakedef.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+..\client\common.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+..\client\crc.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\quakedef.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+..\client\cvar.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+..\client\mathlib.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\quakedef.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\model.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+..\client\net_chan.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\quakedef.h"\
+	"..\client\spritegn.h"\
+	"..\client\winquake.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	"g:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+..\client\net_wins.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\quakedef.h"\
+	"..\client\spritegn.h"\
+	"..\client\winquake.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	"g:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	
+
+..\client\pmove.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\quakedef.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+..\client\pmovetst.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\quakedef.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\pr_cmds.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\pr_edict.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\pr_exec.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sv_ccmds.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sv_ents.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sv_init.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sv_main.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sv_move.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sv_nchan.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sv_phys.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sv_send.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sv_user.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+.\sys_python.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	"g:\program files\microsoft visual studio\vc98\include\basetsd.h"\
+	"g:\python20\include\abstract.h"\
+	"g:\python20\include\bufferobject.h"\
+	"g:\python20\include\ceval.h"\
+	"g:\python20\include\classobject.h"\
+	"g:\python20\include\cobject.h"\
+	"g:\python20\include\complexobject.h"\
+	"g:\python20\include\config.h"\
+	"g:\python20\include\dictobject.h"\
+	"g:\python20\include\fileobject.h"\
+	"g:\python20\include\floatobject.h"\
+	"g:\python20\include\funcobject.h"\
+	"g:\python20\include\import.h"\
+	"g:\python20\include\intobject.h"\
+	"g:\python20\include\intrcheck.h"\
+	"g:\python20\include\listobject.h"\
+	"g:\python20\include\longobject.h"\
+	"g:\python20\include\methodobject.h"\
+	"g:\python20\include\modsupport.h"\
+	"g:\python20\include\moduleobject.h"\
+	"g:\python20\include\object.h"\
+	"g:\python20\include\objimpl.h"\
+	"g:\python20\include\patchlevel.h"\
+	"g:\python20\include\pydebug.h"\
+	"g:\python20\include\pyerrors.h"\
+	"g:\python20\include\pyfpe.h"\
+	"g:\python20\include\pymem.h"\
+	"g:\python20\include\pyport.h"\
+	"g:\python20\include\pystate.h"\
+	"g:\python20\include\python.h"\
+	"g:\python20\include\pythonrun.h"\
+	"g:\python20\include\rangeobject.h"\
+	"g:\python20\include\sliceobject.h"\
+	"g:\python20\include\stringobject.h"\
+	"g:\python20\include\sysmodule.h"\
+	"g:\python20\include\traceback.h"\
+	"g:\python20\include\tupleobject.h"\
+	"g:\python20\include\unicodeobject.h"\
+	
+
+.\world.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	
+
+..\client\zone.c : \
+	"..\client\bothdefs.h"\
+	"..\client\bspfile.h"\
+	"..\client\cmd.h"\
+	"..\client\common.h"\
+	"..\client\crc.h"\
+	"..\client\cvar.h"\
+	"..\client\mathlib.h"\
+	"..\client\model.h"\
+	"..\client\modelgen.h"\
+	"..\client\net.h"\
+	"..\client\pmove.h"\
+	"..\client\quakedef.h"\
+	"..\client\spritegn.h"\
+	"..\client\zone.h"\
+	".\pr_comp.h"\
+	".\progdefs.h"\
+	".\progs.h"\
+	".\qwsvdef.h"\
+	".\server.h"\
+	".\sys.h"\
+	".\world.h"\
+	

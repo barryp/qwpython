@@ -1,0 +1,138 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: qwsv - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "h:\temp\RSP16.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /I "g:\python20\include" /I ".." /D "NDEBUG" /D "_USRDLL" /D "SERVERONLY" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /FR"Release/" /Fp"Release/qwsv.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"F:\QWPython\qwsv\cmd.c"
+"F:\QWPython\qwsv\common.c"
+"F:\QWPython\qwsv\crc.c"
+"F:\QWPython\qwsv\cvar.c"
+"F:\QWPython\qwsv\mathlib.c"
+"F:\QWPython\qwsv\model.c"
+"F:\QWPython\qwsv\net_chan.c"
+"F:\QWPython\qwsv\net_wins.c"
+"F:\QWPython\qwsv\pmove.c"
+"F:\QWPython\qwsv\pmovetst.c"
+"F:\QWPython\qwsv\pr_edict.c"
+"F:\QWPython\qwsv\qwp_entity.c"
+"F:\QWPython\qwsv\qwp_vector.c"
+"F:\QWPython\qwsv\sv_ccmds.c"
+"F:\QWPython\qwsv\sv_ents.c"
+"F:\QWPython\qwsv\sv_init.c"
+"F:\QWPython\qwsv\sv_main.c"
+"F:\QWPython\qwsv\sv_move.c"
+"F:\QWPython\qwsv\sv_nchan.c"
+"F:\QWPython\qwsv\sv_phys.c"
+"F:\QWPython\qwsv\sv_send.c"
+"F:\QWPython\qwsv\sv_user.c"
+"F:\QWPython\qwsv\sys_python.c"
+"F:\QWPython\qwsv\world.c"
+"F:\QWPython\qwsv\zone.c"
+]
+Creating command line "cl.exe @h:\temp\RSP16.tmp" 
+Creating temporary file "h:\temp\RSP17.tmp" with contents
+[
+wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib winmm.lib /nologo /dll /incremental:no /pdb:"Release/qwsv.pdb" /machine:I386 /out:"..\..\qwsv.pyd" /implib:"Release/qwsv.lib" /libpath:"g:\python20\libs" /export:initqwsv 
+.\Release\cmd.obj
+.\Release\common.obj
+.\Release\crc.obj
+.\Release\cvar.obj
+.\Release\mathlib.obj
+.\Release\md4.obj
+.\Release\model.obj
+.\Release\net_chan.obj
+.\Release\net_wins.obj
+.\Release\pmove.obj
+.\Release\pmovetst.obj
+.\Release\pr_edict.obj
+.\Release\qwp_entity.obj
+.\Release\qwp_vector.obj
+.\Release\sv_ccmds.obj
+.\Release\sv_ents.obj
+.\Release\sv_init.obj
+.\Release\sv_main.obj
+.\Release\sv_move.obj
+.\Release\sv_nchan.obj
+.\Release\sv_phys.obj
+.\Release\sv_send.obj
+.\Release\sv_user.obj
+.\Release\sys_python.obj
+.\Release\world.obj
+.\Release\zone.obj
+]
+Creating command line "link.exe @h:\temp\RSP17.tmp"
+<h3>Output Window</h3>
+Compiling...
+cmd.c
+common.c
+crc.c
+cvar.c
+mathlib.c
+model.c
+net_chan.c
+net_wins.c
+pmove.c
+pmovetst.c
+pr_edict.c
+qwp_entity.c
+qwp_vector.c
+sv_ccmds.c
+sv_ents.c
+sv_init.c
+sv_main.c
+sv_move.c
+sv_nchan.c
+sv_phys.c
+sv_send.c
+sv_user.c
+sys_python.c
+world.c
+zone.c
+Linking...
+   Creating library Release/qwsv.lib and object Release/qwsv.exp
+Creating temporary file "h:\temp\RSP1B.tmp" with contents
+[
+/nologo /o"Release/qwsv.bsc" 
+.\Release\cmd.sbr
+.\Release\common.sbr
+.\Release\crc.sbr
+.\Release\cvar.sbr
+.\Release\mathlib.sbr
+.\Release\md4.sbr
+.\Release\model.sbr
+.\Release\net_chan.sbr
+.\Release\net_wins.sbr
+.\Release\pmove.sbr
+.\Release\pmovetst.sbr
+.\Release\pr_edict.sbr
+.\Release\qwp_entity.sbr
+.\Release\qwp_vector.sbr
+.\Release\sv_ccmds.sbr
+.\Release\sv_ents.sbr
+.\Release\sv_init.sbr
+.\Release\sv_main.sbr
+.\Release\sv_move.sbr
+.\Release\sv_nchan.sbr
+.\Release\sv_phys.sbr
+.\Release\sv_send.sbr
+.\Release\sv_user.sbr
+.\Release\sys_python.sbr
+.\Release\world.sbr
+.\Release\zone.sbr]
+Creating command line "bscmake.exe @h:\temp\RSP1B.tmp"
+Creating browse info file...
+<h3>Output Window</h3>
+
+
+
+<h3>Results</h3>
+qwsv.pyd - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
