@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-
+#
+# Run a game of Pythonized Threewave CTF
+#
+# 2000-12-21 Barry Pederson <bpederson@geocities.com>
+#
 import sys
 from qwpython.pakfile import PakLoader
 from qwpython.qwsv import engine
@@ -16,8 +20,8 @@ engine.argv = sys.argv + ['+gamedir', 'ctf']
 #
 engine.stdout = sys.stdout
 engine.loader = PakLoader()
-engine.loader.add_directory('ctf')
-engine.loader.add_directory('id1')
+engine.loader.add_directory('../quake/id1')
+engine.loader.add_directory('../quake/ctf')  # Last added is first searched
 
 #
 # Import the game package to get things going.

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Python-powered Deathmatch
 #
@@ -20,10 +21,10 @@ engine.argv = sys.argv
 #
 engine.stdout = sys.stdout
 engine.loader = PakLoader()
-engine.loader.add_directory('id1')
+engine.loader.add_directory('../quake/id1')
 
 #
-# load the package which holds the game, which
+# import the package which holds the game, which
 # should start things running
 #    
 import py_dm

@@ -56,8 +56,13 @@ else:
 #
 # Have distutils do the actual work
 #    
-setup(name = "qwsv", 
+setup(name = "qwpython", 
       version = "1.0",
+      author = "Barry Pederson",
+      author_email = "bpederson@geocities.com",
+      url = "http://qwpython.sourceforge.net",
+      description = "Python-powered QuakeWorld dedicated server",
+      licence = "GPL",
       package_dir = {'': 'qwpython-src'},
       packages = ['qwpython'],
       ext_modules = 
