@@ -229,6 +229,11 @@ def parse_entity_string(s):
     
 
 def config_entity(ent, data):
+    """
+    Configure a new entity with the data dictionary
+    supplied by the map.  In case of trouble, remove 
+    the entity.
+    """
     try:
         for f in game_entity_fields:  
             setattr(ent, f[0], f[1])
@@ -245,18 +250,20 @@ def config_entity(ent, data):
         qc.self = ent            
         spawn_func(data['classname'])
     except:
-        ent.remove()    
         traceback.print_exc()  
+        ent.remove()    
 
 
-def spawn_entities(s):
+def spawn_entities(spawndict):
     """
-    Parse the map's entstring, and for each entity not inhibited for
-    deathmatch, create an engine entity, set its attributes, and
-    run the spawn function for its class.  In case of trouble, 
-    remove the engine entity.
+    Called with a dictionary with at least two keys: 'mapname'
+    and 'entities'
+    
+    Parse the 'entities' string, and for each entity not inhibited 
+    for deathmatch, create an engine entity, set its attributes, 
+    and run the spawn function for its class.  
     """
-    ents = parse_entity_string(s)
+    ents = parse_entity_string(spawndict['entities'])
     
     # the first gob of info is for the world (which already exists)
     config_entity(engine.world, ents[0])
@@ -266,4 +273,3 @@ def spawn_entities(s):
         if e.get('spawnflags', 0) & 2048 != 0:  # flagged as non-deathmatch only
             continue  
         config_entity(engine.spawn(), e)            
-
