@@ -168,7 +168,7 @@ def TeamCapturePlayerUpdate(*qwp_extra):
         if ctfgame.vote_leader == qc.world:
             qc.centerprint2(qc.self, res, '                    Choose an exit...')
         else:
-            res = TeamSetStatRes2()
+            res = TeamSetStatRes2(qc.self)
             n = str(ctfgame.voteexit_time - qc.time)
             qc.centerprint5(qc.self, res, ctfgame.vote_leader.message, ' leads\012', n, ' seconds until exit')
             

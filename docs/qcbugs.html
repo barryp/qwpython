@@ -21,8 +21,8 @@ body {  background-color: #FFFFFF}
   numbers listed are for the source that was bundled with id's full Quake1/QuakeWorld 
   sourcecode release.</p>
 <p>Any games derived from the original QuakeC deathmatch probably have these bugs 
-  too. CTF for example, has all the bugs found in DM, plus one extra (line numbers 
-  for CTF 4.21d source are listed in parentheses).</p>
+  too. CTF for example, has all the bugs found in DM, plus a few others (line 
+  numbers for CTF 4.21d source are listed in parentheses).</p>
 <h2>grapple.qc (CTF only)</h2>
 <h3>CTF: line 93</h3>
 <p>change: <code>entity (float head) MakeLink =</code><br>
@@ -38,8 +38,15 @@ remove: <code>local vector vec;</code>
 <h3>line 594 (CTF: 595)</h3>
 <p>change: <code>makestatic();</code></p>
 <p>to: <code>makestatic(self);</code></p>
-<code>makestatic</code> is declared to expect one parameter, Python isn't happy 
-when one is not supplied. If not corrected this will raise an exception at runtime. 
+<p><code>makestatic</code> is declared to expect one parameter, Python isn't happy 
+  when one is not supplied. If not corrected this will raise an exception at runtime. 
+</p>
+<h2>status.qc (CTF only)</h2>
+<h3>CTF: line 178</h3>
+<p>change: <code>res = TeamSetStatRes2();</code></p>
+<p>to: <code>res = TeamSetStatRes2(self);</code></p>
+<p><code>TeamSetStatRes2</code> expects a parameter, raises an exception at runtime 
+  if not fixed.</p>
 <h2>triggers.qc</h2>
 <h3>line 432 (CTF: 430)</h3>
 <p>change: <code>other.flags = other.flags - other.flags &amp; FL_ONGROUND;</code></p>
