@@ -2,11 +2,11 @@
 # QuakeC Tokenizer
 #   Barry Pederson <bpederson@geocities.com>
 #
-# $Id: qc2python.py,v 1.4 2001/02/05 16:26:04 barryp Exp $
+# $Id: qc2python.py,v 1.5 2001/02/05 21:15:44 barryp Exp $
 #
 import os, pprint, string, re, types
 
-translator_info = '$Id: qc2python.py,v 1.4 2001/02/05 16:26:04 barryp Exp $'[1:-1]
+translator_info = '$Id: qc2python.py,v 1.5 2001/02/05 21:15:44 barryp Exp $'[1:-1]
 
 ############ Output Filter ###########################
 class VectorFilter:
@@ -809,9 +809,9 @@ system_fields = ['absmax', 'absmin', 'aiment', 'ammo_cells', 'ammo_nails',
                  'button2', 'chain', 'classname', 'colormap', 'currentammo', 
                  'deadflag', 'dmg_inflictor', 'dmg_save', 'dmg_take', 
                  'effects', 'enemy', 'fixangle', 'flags', 'frags', 'frame', 
-                 'goalentity', 'groundentity', 'health', 'ideal_yaw', 
+                 'goalentity', 'gravity', 'groundentity', 'health', 'ideal_yaw', 
                  'impulse', 'items', 'lastruntime', 'ltime', 'max_health', 
-                 'maxs', 'message', 'mins', 'model', 'modelindex', 'movedir', 
+                 'maxs', 'maxspeed', 'message', 'mins', 'model', 'modelindex', 'movedir', 
                  'movetype', 'netname', 'nextthink', 'noise', 'noise1', 
                  'noise2', 'noise3', 'oldorigin', 'origin', 'owner', 
                  'size', 'skin', 'solid', 'sounds', 'spawnflags', 
