@@ -297,7 +297,13 @@ static PyObject * entity_remove(PyObject *self, PyObject *args)
 
     if (!ent)
         {
-        PyErr_SetString(PyExc_TypeError, "Entity has been removed from game");
+        PyErr_SetString(PyExc_TypeError, "Entity has already been removed from game");
+        return NULL;
+        }
+
+    if (ent == sv.edicts)
+        {
+        PyErr_SetString(PyExc_TypeError, "Can't remove the world entity");
         return NULL;
         }
 
