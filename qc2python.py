@@ -1,14 +1,12 @@
 #
 # QuakeC Tokenizer
-#
-# $Id: qc2python.py,v 1.2 2001/02/05 15:37:04 barryp Exp $
 #   Barry Pederson <bpederson@geocities.com>
-#       2000-11-20 (while watching lawyers in Florida kvetch to the supreme court
-#                   about the election, recounts, and hanging-chads)
+#
+# $Id: qc2python.py,v 1.3 2001/02/05 16:19:55 barryp Exp $
 #
 import os, pprint, string, re, types
 
-translator_info = '$Header: /usr/local/cvsroot/qwpython/qc2python.py,v 1.2 2001/02/05 15:37:04 barryp Exp $'
+translator_info = '$Id: qc2python.py,v 1.3 2001/02/05 16:19:55 barryp Exp $'
 
 ############ Output Filter ###########################
 class VectorFilter:
