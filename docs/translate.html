@@ -1,0 +1,119 @@
+<html>
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<h1>Translating QuakeC to Python</h1>
+<p>The QuakeC -&gt; Python translator has been tested against the deathmatch sourcecode 
+  that was supplied with the Quake1/QuakeWorld source release, and CTF 4.21d. 
+</p>
+<p>The Python code that's produced may not be entirely optimal, but should be 
+  completely runnable as long as <a href="qcbugs.html">a few minor QuakeC bugs</a> 
+  are fixed first. </p>
+<p><b>Usage:</b> <code>python qc2python.py</code> &lt;qc-source-dir&gt; [&lt;output-dir&gt;]</p>
+<p><b>Example:</b> <code>python qc2python.py f:\quake\progs py_dm</code></p>
+<p>The <code>qc-source-dir</code> should be the place where your <code>progs.src</code> 
+  and <code>*.qc</code> files reside. If you omit the output-dir, the translated 
+  game code is placed in the qc-source-dir.</p>
+<p>There is also a quick debugging mode, for translating a single QC source file 
+  and outputting the result to stdout. To do this, just supply the name of a single 
+  QC file instead of a qc-source-dir <i>(this was useful mostly for testing the 
+  translator against small snippets of QC code to make sure various constructs 
+  were converted properly)</i>.</p>
+<h2>Warnings</h2>
+<p>The translator will print warnings if: </p>
+<ul>
+  <li>It had to change a variable name which would conflict with a Python reserved 
+    word</li>
+  <li>Using an augmented assignment (+=, -=, etc) didn't seem appropriate (mostly 
+    to catch one of the <a href="qcbugs.html">known QC bugs</a> in <code>triggers.qc</code>). 
+    If you're translating stock DM or CTF, and have fixed the known bugs, then 
+    the warnings should be ignored, since in those cases the translator is doing 
+    the right thing. If you're translating some other QW mod, look at those warnings 
+    closely, and you might catch a small glitch in your original QC code. </li>
+  <li>A local variable has the same name as a function param or a variable in 
+    a higher scope. Don't ignore these, you'll have to rename the variable in 
+    QC and run the translator again.</li>
+  <li>A call to a function that the translator knows should take a parameter, 
+    is without one. This is only checked for a dozen or so functions that are 
+    implemented in C, that the translator is trying to turn into method calls. 
+    No warnings are printed for incorrect calls to QC functions - you'll have 
+    to find those yourself, and should be seen at runtime through raised exceptions. 
+    This is mainly to catch one of the known QC bugs.</li>
+</ul>
+<h2>The Translated Code</h2>
+<p>Each QC source file will be translated into a single Python module. Comments 
+  are retained wherever possible, and overall, the structure of the Python module 
+  should be very close to the original QC file.</p>
+<p>Every module starts off with two lines importing references from the <code>qwpython</code> 
+  package for the QWPython runtime engine, the Vector class constructor, and the 
+  QC runtime emulation object. Then, any dependencies on other translated QC modules 
+  appear as <code>import</code> statements.</p>
+<p>Each translated function is declared with an extra parameter: <code>*qwp_extra</code>, 
+  to absorb any unexpected parameters passed to the function. QuakeC seemed to 
+  ignore that sort of thing, but Python doesn't like it. Many of these are unnecessary, 
+  and can be taken out - this was just a brute-force way of insuring that the 
+  translated code would run right out-of-the-box.</p>
+<p>If a QC function declared any local variables, those variables are initialized 
+  to 0, Vector(0,0,0) or <code>engine.world</code> at the top of the function. 
+  This was another brute-force way of insuring that the translated code would 
+  run, since in Python, a variable doesn't exist until something is assigned to 
+  it. If you are sure that any possible first reference to a variable is always 
+  an assignment (even taking <code>if</code> statements and such into account), 
+  then the initial assignment can probably be removed in most cases.</p>
+<p>At the end of each module will be an extra function to reinitialize the global 
+  variables that appear in that module (for use at level changes), named <code>qwp_reset_&lt;module-name&gt;</code>.</p>
+<p>A module named <code>__init__.py</code> is created to be the entrypoint for 
+  the game, basically, it:</p>
+<ul>
+  <li>Imports all the other translated modules.</li>
+  <li>Defines a reset function for the entire game, to be called on level changes.</li>
+  <li>Holds a list of entity fields that QC defined for the game (not including 
+    the entity fields the underlying C engine already knows about).</li>
+  <li>Wraps two client connect functions to make sure that player entities have 
+    values assigned to all QC declared entity fields.</li>
+  <li>Registers callback functions to the underlying C engine.</li>
+  <li>Starts the game running.</li>
+</ul>
+<h2>Python for QC programmers</h2>
+<p>A couple quick notes about a few key things about Python that are different 
+  from QC:</p>
+<ul>
+  <li>The Vector class is immutable - you can't assign values to the individual 
+    x, y, or z fields. Instead, you have to create a new vector, copying the fields 
+    you don't want to change, and setting the fields that you do. For example, 
+    instead of: <code>a.x = 7</code>, you'd have to write: <code>a = Vector(7, 
+    a.y, a.z)</code>.</li>
+  <li>To make this a bit easier, the '%' operator for Vectors is defined to be 
+    sort of a merge function. So for example given vectors named 'a', and 'b': 
+    <code>a % b</code> will result in a new vector set to the values (b.x, b.y, 
+    b.z), but in the case of values that are <code>None</code>, the corresponding 
+    field from 'a' is copied. This works as an augmented assignment, so the equivalent 
+    of QC's <code>a.x = 7</code> can be written in Python as: <code>a %= Vector(7, 
+    None, None)</code>. </li>
+  <li>Variables in Python aren't declared, they just spring into existance when 
+    something is assigned to them.</li>
+  <li>Variables are typeless - the objects have a type of course, but the names 
+    that refer to them don't. So any name can refer to any type.</li>
+  <li>In QC (and C and Java, and most other languages), variables referred to 
+    in a function are global, unless declared local. In Python it's the other 
+    way around, local unless declared global. So if you have something like: 
+    <pre>
+    x = 1
+    def foo():
+        x = 2
+    foo()
+    print x
+</pre>
+    That assignment of 2 to x is to a local version of x, not the global one, 
+    so the print statment will print 1, not 2. You'd have to add a '<code>global 
+    x</code>' statement to the top of the function to get the global x to be set 
+    to 2. You'll see this in action in the <code>qwp_reset_*</code> functions 
+    at the end of each module, which are full of <code>global</code> declarations. 
+    Without them, the reset functions wouldn't actually reset the global variables 
+    - they would just be setting local variables of the same name.</li>
+</ul>
+</body>
+</html>

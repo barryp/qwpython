@@ -1,0 +1,58 @@
+<html>
+<head>
+<title>Bugs in QuakeC Sourcecode</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<style type="text/css">
+<!--
+h1 {  font-family: Arial, Helvetica, sans-serif; font-size: x-large; font-weight: bold}
+h2 {  font-family: "Courier New", Courier, mono; font-size: large; font-weight: bold; background-color: #CCCCCC; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px}
+h3 {  font-family: Arial, Helvetica, sans-serif; font-style: italic}
+body {  background-color: #FFFFFF}
+.footer {  font-size: small; font-style: italic; text-align: right}
+-->
+</style>
+</head>
+<body bgcolor="#FFFFFF" text="#000000">
+<h1>Bugs in QuakeC Sourcecode</h1>
+<p>Before translating a QuakeC game to Python, there are a few minor bugs that 
+  should be corrected in the QC source. These things must not have bothered the 
+  QuakeC compiler or interpreter - but if they aren't corrected, the translated 
+  Python game will behave incorrectly or raise exceptions at runtime. The line 
+  numbers listed are for the source that was bundled with id's full Quake1/QuakeWorld 
+  sourcecode release.</p>
+<p>Any games derived from the original QuakeC deathmatch probably have these bugs 
+  too. CTF for example, has all the bugs found in DM, plus one extra (line numbers 
+  for CTF 4.21d source are listed in parentheses).</p>
+<h2>grapple.qc (CTF only)</h2>
+<h3>CTF: line 93</h3>
+<p>change: <code>entity (float head) MakeLink =</code><br>
+  to: <code>entity () MakeLink =</code><br>
+</p>
+<p>The <code>head</code> parameter isn't used, and none of the callers supply 
+  it. If this isn't changed, an exception is raised at runtime, and the grapple 
+  behaves incorrectly.</p>
+<h2>misc.qc</h2>
+<h3>line 338 (CTF: 334)</h3>
+remove: <code>local vector vec;</code> 
+<p>local declaration has same name as function parameter. </p>
+<h3>line 594 (CTF: 595)</h3>
+<p>change: <code>makestatic();</code></p>
+<p>to: <code>makestatic(self);</code></p>
+<code>makestatic</code> is declared to expect one parameter, Python isn't happy 
+when one is not supplied. If not corrected this will raise an exception at runtime. 
+<h2>triggers.qc</h2>
+<h3>line 432 (CTF: 430)</h3>
+<p>change: <code>other.flags = other.flags - other.flags &amp; FL_ONGROUND;</code></p>
+<p>to: <code>other.flags = other.flags - (other.flags &amp; FL_ONGROUND);</code></p>
+<p>Without the parentheses, the order of evaluation of the expression for Python 
+  (and most other languages including real C and Java) is such that it would always 
+  evaluate to 0. If this isn't corrected, you'll see odd behavior in the game 
+  such as not being able to pick up weapons after passing through a teleporter.</p>
+<h2>weapons.qc</h2>
+<h3>line 98 (CTF: 118)</h3>
+<p>remove: <code>local vector org;</code></p>
+<p> local declaration has same name as function parameter.</p>
+<hr>
+<p class="footer">2000-02-04</p>
+</body>
+</html>

@@ -1,0 +1,759 @@
+These are notes related to the development of QWPython - which is 
+the QuakeWorld dedicated-server engine wrapped up into a Python
+module.  
+
+Work on this started way back when Quake1/QuakeWorld sourcecode was 
+released.  I first looked at wrapping the engine as a Java class,
+that called back to Java for some simple things like file and 
+console i/o, which worked, but didn't seem terribly useful.
+
+A 100% pure Java implementation seemed possible, and I was able to 
+rewrite the world-model code (stuff like parsing the .bsp file, 
+setting up the world structures, running traces against the world,
+determining point contents), and it ran at a reasonable speed.
+
+The QuakeWorld network code is ugly-ugly stuff, and I ran up against
+a wall translating that to Java.  It probably could still be done,
+but it was extremly unpleasant.  Also, the game logic would either
+have to be rewritten, or a QC interpreter implemented - either way 
+also unpleasant.  With all this unpleasantness, I generally lost
+interest in the whole idea.  Some important things were learned 
+through this process though, such as how the engine works overall - 
+so it wasn't a total waste of time.
+
+During the spring/summer of 2000, I started getting on the Python
+bandwagon, and by Oct/Nov 2000, I started thinking Python might
+be a better language for game programming than Java, because it's
+so dynamic and easy to code in, and integrates well with C.  I don't
+think a 100% pure Python implementation is practical, but a hybrid
+setup with the core engine and network staying in C, and the game
+logic in Python would work.  Rather than embed Python in the QW code,
+I decided to make the QW engine a Python extension - which is generally
+a simpler thing to do.
+
+This log starts a week or two after the initial wrapping of the engine 
+in Python....
+
+2000-11-12
+
+    Made the qwsv module multithread-aware by wrapping the select() in
+    sys_python.c thusly:
+
+        Py_BEGIN_ALLOW_THREADS
+		rc = select (net_socket+1, &fdset, NULL, NULL, &timeout);
+        Py_END_ALLOW_THREADS
+
+    that's all that was needed to let python run other threads while waiting
+    on network io.  For example, running:
+
+        import thread, time
+        def thread_test():
+            while 1:
+                qwsv.engine.stdout.write(time.strftime('Time: %H:%M:%S\n', time.localtime(time.time())))
+                time.sleep(5)        
+        thread.start_new_thread(thread_test, ())
+
+    Before starting the main engine loop caused python to print the time
+    every 5 seconds, even while the main qwsv loop was running.  slick.
+
+2000-11-13
+    
+    Stripped down the model-reading code a bit, removing things that aren't
+    used by the server (textures, edges, vertices, sprites, etc)
+
+    To debug a Python C-extension module under Windows, the .pyd file must 
+    be named module_d.pyd, instead of just module.pyd, and you must run 
+    python_d.exe instead of python.exe.  Being able to dump into the VC++ 
+    debugger when there's a problem rules - much better than printf 
+    debugging.
+
+    Have gotten qwsv calling back to python for each frame, and have the 
+    python code call qwsv.engine.stop() to cleanly stop the main loop
+
+
+2000-11-20
+
+    Have struck upon the idea of writing a QuakeC-to-Python translator
+    as a quick way to get game logic written in Python.  
+
+    Looking at QuakeC, using the "QuakeC Reference Manual" by David 
+    "DarkGrue" Hesprich <darkgrue@iname.com> which I found on the web, it 
+    looks like QC is such a stripped-down limited language, that it could 
+    be easily mapped to Python.  It only has "if" and "while/do-while" 
+    statements (no "for"), the only pointers are function pointers (no 
+    general pointers or pointer arithmetic) which Python also has.  Only 4 
+    types: float string vector and entity, two of which are already in 
+    Python, and the other two (vector and entity) are types I already knew 
+    would need to be implemented in Python.
+
+    Whipped together a tokenizer in Python, which breaks a QC file down 
+    into: comments, strings, numbers, vectors, and identifiers.  Then wrote
+    some semi-ugly code to rearrange the tokens into Python - and made
+    huge progress.  Running against some sample CTF 4.0 code I have it 
+    making some very nice looking Python, that would be workable with 
+    just a few extraneous lines deleted.  Need to work on function and local
+    declarations, which are unnecessary in Python.  Also need to deal
+    with the extra modelgen bits that appear in QC, and vector constants and
+    xyz field access should use '.' instead of '_'
+    
+    Another day or so may be enough to finish the translator up.
+    
+2000-11-23
+
+    Another day or so was a bit optimistic - what I wrote the other day 
+    mostly worked, but that was through sheer trial-and-error, and I had 
+    tacked on so many conditions, that I was honestly unsure -how- it 
+    managed to work in some parts. Totally rewrote the printing and 
+    structuring code so it's more comprehensible and predictable.  It's 
+    looking awfully Lisp-ish now, which is probably a good sign.
+
+    Downloaded the source to ProQCC, to check out what a real QC compiler
+    does in some situations.  Started writing code to translate entire
+    QC projects at a time, rather than just individual files.
+
+
+2000-11-24
+
+    Took care of the modelgen-related bits, basically everything that
+    began with a '$'.  It now either removes that stuff, or rewrites
+    it into decent-looking Python.
+    
+    I'm getting down to the final big bit of the translation - to 
+    track which globals are in which modules, which identifiers are
+    local, and to alter the non-local identifiers to use modules names.
+    But first I need to make sure I can read the defs.qc file properly, 
+    since it's a bit different from the others, with its system global
+    definitions.
+
+2000-11-25
+    
+    Restructured code to hold Operators (including keywords) in a 
+    separate class from Identifiers - to simplify manipulation of 
+    identifiers. Took care of vector fields (_x -> .x), and parsing 
+    the defs.qc file.  Made a good start in resolving globals between
+    modules, but still need to make sure that local can hide globals.
+    
+    See a problem in that the system find() function can take a fieldname
+    as an argument (declared as '.string' type) - which is sort of a sixth 
+    datatype.  Not sure if it'll be possible or practical to take care of 
+    that, so I may have to settle for a 99% conversion.  I suppose I can 
+    treat the find() function as a special case without too much trouble, 
+    but if anyone defined their own function that takes '.string' as a param, 
+    then that'll have to be fixed by hand.     
+    
+    Maybe you can actually declare all 4 field types (.string, .float, 
+    .vector, .entity) as paramenters in functions, which may have to be 
+    fixed up.  I suppose I can track function definitions more closely, and
+    if for example, parameter #n is a dot-type, then any calls to that 
+    function have to have the n-th parameter quoted. 
+    
+    That sounds like a hell of a lot of work, and it'd be quicker just
+    to hand-fix after translation.
+    
+    One other thing that will need hand-fixing, are local vectors in which
+    the code immediately starts accessing the .x,.y,.z fields.  The vast
+    majority of code looks like it sets the value of a local vector from
+    a function or through some vector arithmetic, so it shouldn't usually
+    be a problem - but there will be a few cases that need tweaking.
+    
+2000-11-26
+
+    Just remembered, Vectors will be immutable, so code that tries to set 
+    the .x,.y, or .z fields will need to be reworked anyhow.  So much for a 
+    100% automatic translation.  Shouldn't be hard though to do a quick 
+    scan for the char sequence ".x =" and so on, to warn the user what bits 
+    need fixing.  Can also search for "find(" to warn about the other 
+    translation problem.  Looking for those two things in a CTF 4.0 
+    translation, I bet someone deft at searching and replacing could fix 
+    any translation problems in 10 minutes or so.
+
+    Should probably just generate a "translation report" listing potential 
+    problems, and would also be a nice place to put a cross-reference of 
+    globals and modules - to aid in maintaining the python code.
+
+    Should also do something about the possibility of collision between 
+    names of qc modules and standard python modules.  Module Packages look 
+    like a good idea, so maybe instead of just "import player", you'd see 
+    "import ctf.player" if "ctf" was what we called our translated project. 
+    Not sure about this though, since it'd make our translated 
+    code pretty unwieldly with 
+    the extra level of namespace.
+
+    Can see that bitwise-boolean operators '&' and '|' are going to be a 
+    slight problem, QuakeC only has floats, but the interpreter 
+    automatically casts them to integers before doing the operation. 
+    Python won't do that - so I may have to figure out which entity fields 
+    are most likely to be used as integers, and cast them as so in the 
+    getattr() method, instead of just leaving them as floats.  That'll 
+    probably work ok in general - but if someone was really perverse it 
+    could cause trouble.  Otherwise the translated Python would also have 
+    to be fixed to cast to int before doing '&' or '|'.
+    
+    Put in an initial implementation of a Python entity type - that mirrors
+    the C edict_t structures.  Each time an edict_t is allocated or freed, a 
+    Python is created or freed.  Will have to make sure Python entities are
+    cleanly disposed of on level changes - right now the C code, just wipes
+    memory out in one swoop, but that'd leave Python structures leaking.
+    
+    Worked on the "getattr" method for the Python entity type, coding for
+    floats, strings, and entities.  Still need to work on vectors and 
+    functions.  Setting strings to entities from Python while running a mixed 
+    Python/QuakeC setup may be a bit ugly, since QuakeC uses two fixed-size
+    string tables (one for the compiled QuakeC, one for dynamic strings like
+    player names).  
+    
+2000-11-27
+
+    Worked on the vector class in C, seems to work fine except for the
+    'print' function - which causes an access violation that doesn't make
+    any particular sense.  I can call up the Visual C++ debugger, but the
+    failure point is somewhere inside NT itself, and the QuakeWorld/Python
+    parts of the call-stack seem fine.
+    
+2000-12-03
+    
+    Found that the QuakeC code doesn't allow for -any- change to the edict_t
+    structure - which means I had to keep the pointers to Python entity objects
+    in a completely separate table, rather than have the pointers included
+    in the edict_t structure.  No big deal, but won't be necessary once 
+    QuakeC is gone.  Pretty much finished off the get and set methods
+    for the Python entity type.
+    
+2000-12-04
+
+    Strings and memory - QW manages both pretty tightly, and I need to 
+    untangle a few things.  Dug into the zone.c file, and found that 
+    nothing is using the Cache_* methods (must be client stuff), so threw 
+    them all out.  Tracked back some of the file loading functions, and 
+    removed the ones that weren't being used.  Strings are still a bit of a 
+    problem, since QW keeps them mostly in string tables, but a few may be 
+    dangling out in other spots.  
+
+    I think I'll throw out the string tables completely, but can't do it as 
+    long as I'm still running the QC interpreter.  Pretty soon I'm going to 
+    have to bite the bullet and yank it out.  At that point the engine 
+    won't be runnable, so I'm putting that off as long as possible, to make 
+    debugging other bits easier.
+
+2000-12-11
+
+    Have been working pretty steadily the last few days on putting the 
+    final ducks in a row.  Have updated the qc->python translator to 
+    correctly declare global references in functions, laid the groundwork 
+    for objectifying function calls so things like sound(ent, ...) will 
+    become ent.sound(...).  Have also gotten the C code up to the point of 
+    seeming to implement everything necessary.
+
+    Have just now started commenting out the QC code in the qwsv C code, 
+    and     have started trying to fire up a true Pythonized version of 
+    QuakeWorld. (Took the first whack at just about the same moment CNN 
+    started playing the tape from the second Supreme Court hearing on Bush 
+    v. Gore).  Have found one minor problem so far, in that the word 'from' 
+    is reserved in Python (as in 'from foo import bar'), but is used in the 
+    QuakeC deathmatch code as a variable.  Should probably tweak the 
+    translator to fix that.
+
+    Found that the translator is adding module prefixes to function 
+    parameter     declarations, which it shouldn't do.  For example:
+    
+        void(float old, float new) Deathmatch_Weapon
+        
+    became
+    
+        def Deathmatch_Weapon(triggers.old, new)
+        
+    I'm assuming the 'triggers' module must have a global named 'old'. 
+    Also found that 'or' is used as a variable, but is used in Python 
+    instead of '||'
+    
+    do..while translations are not correct, in that the new if..break 
+    statements aren't indented correctly.
+    
+    In trying to run the -real- Pythonized quakeworld, ended up really 
+    ripping out C code that was getting in the way, and had to temporarily 
+    remove small bits that had to do with checking player gravity and 
+    maxspeed.
+
+    Finally, bit by bit, got it so you can enter the game, run around, and 
+    fire weapons.  All kinds of nitpicky little things need adjusting, but 
+    by watching the error messages, and always fixing the first thing 
+    first, it's slowly coming together. 
+    
+    Found this QuakeC construct, that the translater doesn't handle 
+    correctly:
+    
+    	if (a)
+        	if (b)
+		        c();
+	        else
+        		d();
+    	e();        
+    	
+    The translator renders e() as part of the if (a) body, instead of being
+    equal to it. ouch.  That's unclear C coding though, it really shouldn't
+    have been written that way in the first place.  Should try to at least 
+    warn about that if I can't catch it - otherwise the translated code
+    may have very subtle hard-to-catch errors.  	
+    
+2000-12-12
+
+    After sleeping on it, came up with a simple fix for the above problem of 
+    nested if statements.  
+    
+    Am seeing that QuakeC code expecting all entity fields to be initialized
+    to zero is going to be a problem, since under Python entity attributes
+    don't exist at all until something's assigned to them.  One possible fix
+    is for the translater to gather up a list of all declared entity fields, 
+    and override the engine.spawn() to initialize all fields right after
+    each entity is created.  It seems pretty inefficient since QC defined
+    a -lot- if fields (although most entities just use a few), but would make 
+    the translated code work more smoothly.  Otherwise it may take quite a 
+    bit of hunting to track down all potential references to uninitialized 
+    attributes.
+    
+    Another problem I've noticed is that some QuakeC code passes arguments
+    to no-arg functions, which is probably ok in QuakeC, but pisses Python
+    off.  Will probably have to alter those functions to take a '*' type
+    varargs argument. Not sure how pervasive this is, and if a few minor
+    hand-tweaks will take care of it or if it's something the translator
+    will have to deal with.
+    
+    Fixed the malformed do-while translation
+    
+    Wrote a simple little checker to look over translated code for
+    assignments to vector fields (x, y, or z).  Fiddled with configuring
+    UltraEdit (I live by this program, get it at http://www.ultraedit.com)
+    to capture the output of the checker, so you can click on a line in the
+    report to jump to the file and line with the code that needs fixing.
+    
+2000-12-14    
+
+    Fixed the code that prepends module names to variables that reside
+    in other modules, so that it respects 'local' declarations, and
+    leaves function parameter lists alone.
+    
+    Wrote a new bit to gather up the non-system entity field declarations
+    into a tuple of tuples, containing each field's name and initial value.
+    Then wrapped a qc.spawn() around engine.spawn() so that all the extra
+    entity fields could be initialized.  Also wrapped around
+    PutClientInServer to do the same thing with clients.
+    
+    Am finding that it was a mistake to use None for the initial value
+    of strings and probably entities.  Should use '' and probably 
+    engine.world instead. 
+    
+    Code is working better..can now jump through teleporters now, but
+    can only pick up one weapon now..for some reason it silently ignores
+    other weapons.
+    
+2000-12-15
+
+    In tracking down a problem with an exception being raised when firing
+    a rocket into a door, I found a bug/misfeature in the C code: in 
+    sv_phys.c:SV_Impact(), the code is supposed to deal with two entities
+    touching - it runs the first entity's touch function, and then runs
+    the second entity's touch function, even if the first entity was
+    removed during the first touch function.  I was totally wiping out
+    the Python entity when a C entity was removed, but may have to 
+    keep it around to handle this poor situation, and only remove it
+    when the underlying free C entity is reallocated.
+    
+2000-12-16
+
+    Reworked the entity allocation code so that Python entities are
+    pretty much permanent, and just have their dictionaries cleared
+    when a freed entity is reallocated.
+    
+    Have gotten the translator to the point now where I can translate
+    the stock DM code, and run it without having to do any manual
+    changes at all.  It sets all fields and entity fields to 
+    default values, translates vector assignments, and takes care of
+    calls to the QuakeC 'find' function.
+    
+    Unfortunately, there's a runtime error now: if you start drowning
+    in water, or burning in lava, the game halts with an access violation.
+    It seems to be in a different place everytime - I think something's
+    overwriting memory that doesn't belong to it.  This kind of thing
+    is hard to track since it might be happening quite a while before
+    the game crashes.  Trying to figure out what's going on in the
+    water/lava code that's different.  Perhaps QC is getting a hold of
+    a string buffer that really belongs to Python, and is mucking with
+    it after Python thinks it's free to use it for something else.
+    
+2000-12-17
+
+    Still mulling over the runtime error, I found that it's not specific
+    to water/lava, and can happen when being damaged/killed with the RL.
+    Doesn't always happen, so I don't know if this is a new problem or
+    not.  Maybe it's always been there, but have only now done enough
+    killing to notice it.
+    
+    Tweaked the GL QuakeWorld Client to allow multiple instance to run
+    simultaneously.  Just had to alter Host_Init() to call Net_Init()
+    with PORT_ANY instead of PORT_CLIENT; and alter Sys_Init() to not
+    bother with creating a semaphore/mutex to detect other instances.
+    Those two small changes seem to be all that's required.
+    
+    Ran two instances and sort of got my 'first-frag' (suicides and 
+    killing yourself by rocket/grenade jumping shouldn't really count)
+    Unfortunately I couldn't actually see myself in the game, each
+    player was invisible to the other, and only the corpse head showed
+    up when killed.  This seems vaguely familiar, and might have happened
+    in Q2Java too when it first got up and running.
+    
+    --- later ---
+    
+    Think I have the crash fixed, turns out you're not supposed to
+    Py_DECREF objects obtained from PyArg_ParseTuple - but I was doing
+    that in my Vector construction function, when something other
+    than 3 floats was passed.  So it -was- a new problem, created
+    when I put in the code to allow the '%' operator to be used
+    for relatively easier vector field modification.  Caught this
+    by noticing that many of the crashes happened while the vector
+    creation function was on the stack, and started thinking about
+    what it was doing.
+    
+    Not totally out of the woods though, in tracking this down I found
+    that Py_None was gaining references non-stop, even when the server is
+    just idling with no clients connected.  So that must mean either
+    I'm Py_INCREF'ing when it shouldn't or forgetting a Py_DECREF
+    somewhere.
+    
+    Noticed that jumping through a teleporter kills your ability to pick
+    up weapons, but picking up health and ammo is unaffected. Strange.
+    
+    --- even later ---
+    
+    Found why the refcount for Py_None was increasing: wasn't decrementing 
+    the return value from PyObject_CallFunction(), which we call a -lot-. 
+    In reading through the Python docs about PyArg_ParseTuple, found the 
+    bit where we can use the "O!" specifier, along with a Python type 
+    object, to specify that the parse should check for that particular 
+    type. Makes the code a bit simpler not to have to check ourselves.
+    
+    Have it to the point now where an idling server has a stable Py_None
+    refcount.
+    
+    --- during The X-Files ---
+    
+    The teleport killing weapons bug may be in the original QuakeC code:
+   
+         other.flags = other.flags - other.flags & FL_ONGROUND;
+         
+    In Python, Java, and real C, the '-' operator has higher precedence
+    than the '&' operator, so other.flags would always be set to 0.  The 
+    QuakeC Reference Manual lists '+' '-' '&' '|' in the same precedence
+    group, so it doesn't really say how '-' and '&' relate to each other.
+    But even if they are exactly the same precedence in QuakeC, 
+    left-to-right associativity would imply that the '-' is still executed 
+    first, and other.flags would always be set to zero.
+    
+    If you put parentheses around 'other.flags & FL_ONGROUND' so it executes
+    first, then everything works fine, and is how all the other DM QuakeC
+    code is written that uses both '&' and '-'
+    
+    Next, need to work out why changing levels doesn't work when you jump
+    in an exit.  Probably no big deal.  Also need to figure out why when
+    entering with 2 clients, they can't see each other (but can bump into
+    and kill each other).
+         
+2000-12-18
+
+    Fired up the stock QWSV, to check that 2 clients on the same server
+    really should be able to see each other (wanted to make sure there
+    wasn't some weirdness in the client that prevented it).  Also found
+    that you should be able to go through the registered-only doors, given
+    the particular .pak files I'm running with (I think I was able to do
+    this back when qwpython was a hybrid QuakeC/Python beast, and the 
+    ability has gone away after switching to a pure-Python interpreter).
+    
+    Also noticed that real QWSV doesn't bitch about non-standard player/eye
+    model the way QWPython does - but don't think I touched anything to
+    do with that.  It looks like the client sends more info to the real
+    QWSV than to QWPython (in QWPython one of the emodel/pmodel pair
+    in userinfo was 0, but in QWSV the correct value is there).  Strange,
+    now it's only happening when a second player connects.
+    
+    Found the players not-seeing-each other bug..I was setting the first 
+    slot in the sound/model precache tables to NULL, which means the slot 
+    was used by the first thing pre-cached, which was the player model. In 
+    the code that finds which BSP leaves an entity is touching, it bails if 
+    the entity model is 0, which is what the players happened to be. If 
+    you're not touching any BSP leaves, then the network code doesn't send 
+    your player info to the other players (whew). Set the first slots in 
+    the model/sound precache tables to the empty string "", which is what 
+    ends up happening in real QWSV, and all is well (at least as far as 
+    players seeing each other goes).  Another example of a screwup because 
+    I didn't understand what the original code was doing.
+    
+    ----
+        One snowy day, when all outside was white
+            Two python-powered boys had a fight
+        
+        Back-to-back they faced each other
+            One drew his RL and shot the other!
+        
+        The programmer through his speakers heard the noise
+            And on the screen saw one dead boy
+        
+        If you do not believe this lie
+            I'll setup a server later this week
+                And we'll play-test for all!                        
+                
+    ----
+    
+    The doors-not-opening bit was due to the code that links the
+    doors to their 'owners' not working correctly because at one
+    point in LinkDoors, there is an 'if' statement that evaluated
+    to true when the condition evaluated to be the world entity.
+    Added a bit in the C code, to treat entities as numbers, and
+    to treat the world entity as a zero-value, so this now works.
+    
+    So the doors in the start map open now, but unfortunately are
+    closing when they shouldn't.                
+            
+    SourceForge project came through, looks quite cool - will be
+    much easier than Q2Java was, having the website, CVS, mailinglist
+    all separate, no bug tracker, etc.
+    
+    Have worked out a simple way to pass command-line args to the engine, 
+    and am now able to control the game through rcon.  Have looked at some 
+    other maps, and now see a semi-serious problem in that when you switch 
+    maps, too many old Python objects are dangling around.  Have worked out 
+    a way to clear the game globals in C, think I have the globals held by 
+    the 'qc' object clearing out, but now the big problem is what to do 
+    with the few globals here and there that reside in individual modules?  
+    
+    I think all non-system globals may have to be gathered into a list, 
+    that can be read through and initial values re-set. OR..somehow reload 
+    all the game modules.  This would be easier to deal with if all the 
+    translated code was gathered into a single Python module, rather than 
+    keeping separate modules to match the original QC source files.
+                
+    Maybe each module could have a special 'reset' function, that re-
+    initialized that module's globals.  That sounds promising.
+                    
+2000-12-19
+
+    Game each module a reset function, that seems to improve things quite a 
+    bit on level changes.  Am running the reset functions at entity-spawn 
+    time, but that might be a bit late, since it looks like the C code 
+    calls StartFrame one time before spawning entities.  It happens not to 
+    bother the DM code, but who knows about other mods.  May have to add a 
+    special callback from the engine to let the game code know when the 
+    level has restarted, like what Q2Java has.
+    
+    Found what was wrong with the doors closing when they shouldn't, 
+    another real 'Doh!' moment: In spawnning entities, I was setting the 
+    initial values to what was specified by the map ent-string, and then 
+    overwriting them with the default values :P  This also screwed up the 
+    level changes when touching an exit, since I was replacing the name of 
+    the next map with a 'None'
+    
+    The other problem with using the exits was that I had the 'infokey'
+    function still returning empty strings when it couldn't find 
+    a value, but had the translator converting those to 'None' values.
+    
+    Everything is groovy now, don't see any bugs while playing the game!!!
+    
+    I put together a Python distutils setup.py file and tried building on 
+    FreeBSD.  The build works great (no makefile needed), but Python dumps 
+    core when importing 'qwsv'.  Learned a little about using 'gdb' to 
+    examing core file to see what the program stack was, and for some 
+    strange reason it's bailing while registering CVars - which didn't seem 
+    like it should be a terribly challenging thing to do.  Don't see any 
+    obvious cause, but there must be a cause somewhere.
+    
+2000-12-20
+
+    Found out why the translator wasn't working quite right on FreeBSD,
+    knew it had something to do with the '\r' character, and found
+    where exactly I left that out and fixed it.
+    
+    Added code to the translator to look for places where it could
+    use augmented assignments ('i += 1' instead of 'i = i + 1' for
+    example). Makes the game logic much more readable.
+    
+    Got the C code to work on FreeBSD.  For some reason when it tried to 
+    register the CVar named 'timeout', it was causing an access violation. 
+    Changing the name to something else (timeout_x) made it happy.  I 
+    wonder if that was some sort of link problem, where it was linking the 
+    identifier 'timeout' to something in the C library. It looks like there 
+    is a 'timeout' function in <curses.h>.  This worries me, I wonder how 
+    many other identifiers besides 'timeout' are goofed, but just haven't 
+    hit them yet.
+    
+    Anyhow, can now play on a FreeBSD server.  
+    
+    Found another game problem that's actually a bug in the original 
+    QuakeC.  It looks like you could declare a local with the same 
+    name as a function parameter. As in (from misc.qc):
+    
+     void(vector org, vector vec) LaunchLaser =
+        {
+	    local   vector  vec;
+	    ...
+	    
+    The QC compiler must have just ignored the local declaration.  I 
+    modified the translator to print a warning when this happens, and 
+    let the user fix the QC or the translated Python code manually.  
+    In the DM code it only happens twice.  But if it's ignored, it
+    causes weird behavior in the game, since the parameter is 
+    essentially set to zero.
+    
+    Found that CTF uses some constants that are larger integers
+    than what Python allows.
+    
+        float	IT_SIGIL4				= 2147483648;
+        
+    doesn't work as a straight translation.  0x80000000 works
+    ok. 
+    
+    Looks like CTF tries to sneak comments into the middle of an
+    'if' statement (from client.qc):
+    
+    	if ( (head.steam == attacker.steam) &&
+ 	     (head.player_flag & ITEM_ENEMY_FLAG) &&
+ 	     (head != attacker) && // self defense
+ 	     (!flag_carrier_radius) ) {        
+     
+    Gotta prevent that.                        
+    
+    Started working on getting CTF running, found that it makes -heavy- use 
+    of bitflags, and the '&' '|' operators.  This caused problems, because 
+    Python doesn't allow those to be used with floats.  Decided the thing 
+    to do was have the C code check whether it could return a PyFloat or a 
+    PyInt, instead of always returning a PyFloat, except for a few special 
+    cases I had hardcoded (makes much more sense).
+    
+    With all the bitflags, I found that CTF was trying to set one constant 
+    to: 2147483648, which is one too large to be acceptible for an integer. 
+    Hand-corrected the like (in the 'defs' module) to use 0x80000000 
+    instead.  Should think about having the translator handle that case.
+    
+    Found a few bugs in CTF, one is that the MakeLink() function is 
+    declared to take a 'head' parameter, but it's never used, and the 
+    callers didn't provide it.  Must not have bothered QuakeC, but Python 
+    doesn't like it.  Probably just something that has to be hand-
+    corrected. (God QuakeC is a sloppy language..too few parameters, too 
+    many parameters, doesn't matter, works anyhow).
+    
+    Have CTF running to the point you can enter the maps, run around, etc 
+    Can even grapple :)  Flags don't appear, and picking up armor makes it 
+    act as if you have every powerup in the world.  Haven't seen any runes.
+
+    Found that centerprint can take floats as args, and seem to be 
+    converted to ints.
+    
+2000-12-21
+
+    Python 2.0's Distutils rocks!  With just a couple minor changes from
+    what I was using to build the FreeBSD version, it can now build
+    the Win32 version also!  No makefiles required at all.
+    
+    Rearranged the source files, and tweaked the distutils setup, so that 
+    qwsv, qcsupport, and pakfile now live in a Python package named 
+    'qwpython' - should make things much cleaner.  Also changed the 
+    translator to use the 'qwpython' package, and to put translated games 
+    into packages themselves (the only change required was to call the main 
+    game module '__init__.py' instead of 'qwp_game.py' - and in the startup 
+    code just 'import py_dm' instead of adding 'py_dm' to the python path 
+    and then importing 'qwp_game.py')  This is much much cleaner :)
+
+    See that the bug with picking up armor giving you every powerup is now 
+    in plain DM too, so I guess it wasn't something CTF-specific.  This is 
+    good news - since it means it's cause by something I myself changed, 
+    rather than some new bit of code I haven't seen yet. Looks like it's a 
+    problem with augmented assignments, disabling that in the translator 
+    and re-translating fixes the armor problem.  Still don't see flags in 
+    CTF though.
+    
+    Found that it was a bad idea to reset the modules at spawn time, they
+    really need to be reset a bit sooner, since the engine calls StartFrame
+    once before spawning, so it can read cvars, which the spawn funcs look
+    at.  Added a 'reset_game' attribute to the engine object, that can be
+    set with a function, and will be called before the first frame is run.
+    Kind of knew I wanted to do this, and it turned out be more necessary
+    than I though.  See flags now, but am able to pickup both - seems game
+    is unsure which team I'm on.
+    
+    Found some runes! they even seem to work (had regen), and drop to the 
+    ground on suicide (although the flags I was carrying didn't drop, 
+    just disappeared).
+    
+    Team problems are due to both ClientConnect and PutClientInServer
+    wiping out entity variables :(  Simple enough to fix, just had PCIS only
+    set the attributes if they don't already exist.  Did that, and made my
+    first capture about 1:38PM CST :)  Can even drop flags on death.
+    
+    Ran through most of the CTF maps, found and fixed some minor problems 
+    in the original QuakeC CTF code (function calls missing params).  Only
+    had trouble with ctf2m4 and ctf2m6 - engine bailed with a 
+    "SZ_GetSpace: overflow" message.  Will have to backtrack that with
+    the VisualC++ debugger.  Although a Google search shows old messages
+    from 1997 on a Thunderwalker-related site reporting the same thing -
+    so it's probably an old bug.
+    
+    Overall though, it works great.  Even faithfully mimics the problems
+    in 'the kiln' where you spawn stuck in the floor (probably actually
+    a map problem).
+    
+2000-12-22
+
+    Think I have augmented assignments fixed, so you don't get all powerups
+    when you pickup armor.  The problem was that: 'a = a - b + c' is not
+    the same as: 'a -= b + c'.  In the first case, the subtraction is
+    performed first, and the addition second, in the incorrectly translated
+    augmented version, the addition would be performed first, and the 
+    subtraction second.  So tweaked the translator to '+' as lower in 
+    precedence to '-', which is not strictly true, but true enough in that
+    any '+'es we're considering will be to the right of the '-', and must
+    not be performed before the '-'
+    
+    The '/' operator would have the same problem, so set it to not augment
+    if the right side has a '*' or another '/'
+    
+    Fixed the large-integer problem, so it writes using hex-notation if 
+    necessary.  It looks like you can now translate CTF (as long as the
+    QuakeC bugs are fixed first), and the translated game is runnable
+    without any manual tweaks required.
+        
+2001-01-20
+
+    Have been a bit lax about maintaining this log, but really haven't done 
+    much lately.  Was waiting for a long time for SourceForge to get its 
+    act together, but they're still not quite there yet. Have dabbled a bit 
+    with making a nice webpage and logo for QWPython - learning
+    a bit about CSS in HTML in the process.        
+    
+    Since it sounds like SF may finally be done with their big upgrade next 
+    week - I worked on some documentation, and polishing up the install a 
+    bit.  Have found that the Distutils install command can be told where 
+    to place the compiled files - and it'd make more sense to place them 
+    where the rest of the distribution resides, instead of a 'site-
+    packages' directory on a unix box (which might require special 
+    permissions), or the main Python dir as Windows does (which would be
+    a pain if Python is uninstalled and replaced with a new version).  
+    
+    Added a 'version' attribute to the qwpython.qwsv.engine object, to 
+    identify the exact revision and API the engine supports.  It returns as 
+    a dictionary with two keys, 'name': a string currently set to 
+    'qwpython v1' which identifies the general API, and should be changed 
+    whenever backwards compatibility is broken (or the code forks), and 
+    'revision': an integer that should be bumped anything something changes 
+    that might affect the Python code.
+    
+    So if game code cares to check and make sure it's running on a 
+    particular engine, it should just fetch engine.version dictionary, make 
+    sure the name == what it expects, and the revision is >= what is 
+    expected. (None of this Linux-style x.y.z-beta-a-pre-b BS, computers 
+    can't make any sense of that crap)
+    
+    Slightly modified the C code that calls Python to spawn entities, so
+    that instead of simply passing the entity string, it now passes a 
+    dictionary with the keys 'mapname': the name of the map, and 'entities':
+    the entity string.  This should future-proof things a bit, maybe someday
+    Python can treat it as a full-blown Q2Java-style event that gets passed
+    to listeners who can modify the dictionary before actually spawning
+    anything.
+    
