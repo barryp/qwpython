@@ -1,0 +1,36 @@
+QWPython CHANGELOG
+
+2001-04-15 (v1.1)
+
+    * Added WinNT/Win2k service version of CTF. 
+      Pretty straightforward, anybody should be able to 
+      adapt it to other QWPython games besides CTF - nothing
+      in CTF itself changed, all the magic is in the
+      ctf_service.py file.
+    
+    * Removed C code relating to PAK files, since Python
+      handles all that now.  Looked for and removed
+      other dead code (probably plenty left though).
+      
+    * Reworked download code, so it now functions with the
+      Python resource-loading code. Still a few file-io
+      related bits of C code it would be nice to move up to
+      Python.
+      
+    * Tested against Debian 2.2, found and fixed problems
+      that prevented a clean compile and running under Debian
+      (and presumably other Linuxes)
+      
+    * Changed Sys_Error() function so that it now does exit
+      the game loop and raise a Python exception.  Wish I 
+      could also have it include the file and linenumber of
+      where in C the Sys_Error() was called.
+      
+    * Cleaned up Python "pakfile" module                        
+    
+    * Went over translated CTF, cleaned up code by hand
+      since the machine translation was a little rough to
+      look at (weird spacing, unnecessary assignments at the 
+      tops of many functions)
+      
+-----------------------------------      
