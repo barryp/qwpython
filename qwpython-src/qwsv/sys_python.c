@@ -17,6 +17,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+/* 
+Identify the engine - change the name if the API changes
+enough to break backwards compatibility.  Otherwise just
+bump the revision by 1 (unless the changes are so trivial
+that they don't affect the Python code at all)
+*/
+#define ENGINE_NAME "qwpython v1"
+#define ENGINE_REVISION 1
+
 #include <sys/types.h>
 #include <sys/timeb.h>
 #ifdef _WIN32
@@ -1281,6 +1291,8 @@ static PyObject * engine_getattr(qwp_engine_t *self, char *name)
 		result = self->spawn_func;
 	else if (strcmp(name, "stdout") == 0)
 		result = self->out;
+    else if (strcmp(name, "version") == 0)
+        return Py_BuildValue("{s:s, s:i}", "name", ENGINE_NAME, "revision", ENGINE_REVISION); 		
     else if (strcmp(name, "world") == 0)
         result = self->world;
 
@@ -1291,7 +1303,7 @@ static PyObject * engine_getattr(qwp_engine_t *self, char *name)
 		}
 
 	if (strcmp(name, "__members__") == 0)
-		return Py_BuildValue("[s,s,s,s,s]", "argv", "frame_handler", "loader", "reset_game", "stdout", "world", "spawn_func");
+		return Py_BuildValue("[s,s,s,s,s]", "argv", "loader", "reset_game",  "spawn_func", "stdout", "version", "world");
 
 	return Py_FindMethod(engine_methods, (PyObject *)self, name);
 	}
