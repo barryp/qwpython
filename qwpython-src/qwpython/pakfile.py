@@ -94,18 +94,28 @@ class PakLoader:
         self._paklist = []
 
     def add_file(self, filename):        
-        """ add a single PAK file to the list"""
-        self._paklist.append(PakFile(filename))
+        """ 
+        Add a single PAK file to the list. Last added
+        will be first searched.
+        """
+        self._paklist.insert(0, PakFile(filename))
 
     def add_directory(self, dirname):
-        """ add all PAK files in a directory to the list"""
-        self._paklist.append(ResourceDir(dirname))
-        for f in os.listdir(dirname):
+        """ 
+        add all PAK files in a directory to the list, and then
+        add the directory itself.  The directory will end up
+        being searched, then the contents of the pak files
+        (in alphabetical order).
+        """
+        files = os.listdir(dirname)
+        files.sort()
+        for f in files:
             if string.lower(f[-4:]) == '.pak':
                 try:
                     self.add_file(os.path.join(dirname, f))
                 except:
                     pass
+        self._paklist.insert(0, ResourceDir(dirname))
 
     def has_key(self, name):
         """Check if any of the pak files has the given name"""
