@@ -62,7 +62,25 @@
   run, since in Python, a variable doesn't exist until something is assigned to 
   it. If you are sure that any possible first reference to a variable is always 
   an assignment (even taking <code>if</code> statements and such into account), 
-  then the initial assignment can probably be removed in most cases.</p>
+  then the initial assignment can probably be removed in most cases. Here's an 
+  example from <code>plats.py</code>:</p>
+<pre>
+    def func_train_find(*qwp_extra):
+        targ = engine.world
+        targ = qc.find(qc.world, 'targetname', qc.self.target)
+        qc.self.target = targ.target
+        qc.setorigin(qc.self, targ.origin - qc.self.mins)
+        if not qc.self.targetname:
+            #  not triggered, so start immediately
+            qc.self.nextthink = qc.self.ltime + 0.1
+            qc.self.think = train_next
+</pre>
+<p>That first assignment of <code>engine.world</code> to <code>targ</code> is 
+  unnecessary, and can be removed. A fancier translator that looked ahead and 
+  analyzed the functions a bit could avoid that sort of thing - but it's relatively 
+  harmless, and can be cleaned up by hand (someone <i>is</i> going to modify this 
+  Python code, right? otherwise what's the point? might as well leave it in QC 
+  if it isn't going to be altered).</p>
 <p>At the end of each module will be an extra function to reinitialize the global 
   variables that appear in that module (for use at level changes), named <code>qwp_reset_&lt;module-name&gt;</code>.</p>
 <p>A module named <code>__init__.py</code> is created to be the entrypoint for 
@@ -113,7 +131,9 @@
     to 2. You'll see this in action in the <code>qwp_reset_*</code> functions 
     at the end of each module, which are full of <code>global</code> declarations. 
     Without them, the reset functions wouldn't actually reset the global variables 
-    - they would just be setting local variables of the same name.</li>
+    - they would just be setting local variables of the same name</li>
 </ul>
+<hr>
+<p align="right"><i>2000-02-05</i></p>
 </body>
 </html>
