@@ -40,10 +40,13 @@ static PyObject * vector_add(qwp_vector_t *v, qwp_vector_t *w)
     }
 
 
-static PyObject *vector_angle_to_vectors(qwp_vector_t *v)
+static PyObject *vector_angle_to_vectors(PyObject *self, PyObject *args)
     {
     vec3_t forward, right, up;
     PyObject *result;
+    qwp_vector_t *v;
+
+    v = (qwp_vector_t *) self;
 
     AngleVectors(v->v, forward, right, up);
 
@@ -136,9 +139,12 @@ static PyObject * vector_div(qwp_vector_t *v, qwp_vector_t *w)
     }
 
 
-static PyObject * vector_length(qwp_vector_t *vec)
+static PyObject * vector_length(PyObject *self, PyObject *args)
     {
     double length;
+    qwp_vector_t *vec;
+
+    vec = (qwp_vector_t *) self;
     length = sqrt((vec->v[0] * vec->v[0]) + (vec->v[1] * vec->v[1]) + (vec->v[2] * vec->v[2]));
     return PyFloat_FromDouble(length);
     }
@@ -177,7 +183,7 @@ static int vector_nonzero(qwp_vector_t *v)
     }
 
 
-static PyObject * vector_normalize(PyObject *self)
+static PyObject * vector_normalize(PyObject *self, PyObject *args)
     {
     vec3_t temp;
     double length;
@@ -267,12 +273,15 @@ static PyObject * vector_sub(qwp_vector_t *v, qwp_vector_t *w)
     }
 
 
-static PyObject * vector_to_angle(qwp_vector_t *v)
+static PyObject * vector_to_angle(PyObject *self, PyObject *args)
     {
     vec3_t temp;
 
 	double	forward;
 	int	yaw, pitch;
+    qwp_vector_t *v;
+
+    v = (qwp_vector_t *) self;
 	
 	if (v->v[1] == 0 && v->v[0] == 0)
     	{

@@ -214,7 +214,7 @@ main
 char	*newargv[256];
 quakeparms_t	parms;
 
-static void engine_init()
+static void engine_init(void)
 	{
 //	static	char	cwd[1024];
 	int				t;
@@ -338,7 +338,7 @@ unsigned short COM_CRC_File(char *path)
 		return 0;
 		}
 
-	PyString_AsStringAndSize(contents, (char *) &buf, &len);
+	PyString_AsStringAndSize(contents, (char **) &buf, &len);
 	crc = CRC_Block(buf, len);
 
     Py_DECREF(contents);
