@@ -392,7 +392,7 @@ void SV_SpawnServer (char *server)
 	// load and spawn all other entities
 	// ED_LoadFromFile (sv.worldmodel->entities);
         {
-        PyObject *result = PyObject_CallFunction(qwp_engine->spawn_func, "s", sv.worldmodel->entities);
+        PyObject *result = PyObject_CallFunction(qwp_engine->spawn_func, "{s:s,s:s}", "mapname", sv.name, "entities", sv.worldmodel->entities);
         if (result)
             Py_DECREF(result);
         else
