@@ -1,97 +1,165 @@
 #!/usr/local/bin/python
-"""Read Quake-style PAK files.  
+"""
+Library for reading Quake-style PAK files, and loading
+resources from those files and regular directories
 
-   Barry Pederson <bpederson@geocities.com> 2000-11-05
+   Barry Pederson <bpederson@geocities.com> 2001-04-09
 
-(Interface is similar to the standard Python "zipfile" module)"""
+(Interface is similar to the standard Python "zipfile" module)
+"""
 
-import os, os.path, string, struct
+import os, os.path, struct
 
-class BadPakFile(Exception): pass
+class BadPakFile(Exception): 
+    """
+    Exception that will be raised from the constructor
+    of instances of the PakFile class, if the specified
+    file is not a valid PAK file.
+    """
+    pass
+
 
 class PakInfo:
-    """Instances of PakInfo are returned by the getinfo() and infolist()
-       methods of PakFile objects.  Each object stores information about
-       a single member of the Pak file.
-       (Based on the standard Python ZipInfo class)"""
+    """
+    Hold information on a single member of a Pak file, is returned by 
+    the getinfo() and infolist() methods of PakFile objects.  The
+    properties held are:
+    
+        filename:       name of the item in the Pak file
+        file_offset:    position within the Pak file
+        file_size:      size of the item
+        
+    (Based on the standard Python ZipInfo class)
+    """
     def __init__(self, name, offset, size):
         self.filename = name
         self.file_offset = offset
         self.file_size = size
 
+
 class PakFile:
-    """Provides read-access to a Quake-style PAK file.  (Based on the 
-       standard Python ZipFile class)"""
+    """
+    Provides read-access to a Quake-style PAK file.  
+    (Based on the standard Python ZipFile class)
+    
+    """
     def __init__(self, filename):
         f = open(filename, 'rb')
+        
+        # 
+        # Header is 3 little-endian 4-byte integers, a 
+        # signature, an offset to the directory block, and
+        # the size of the directory block (which should be a 
+        # multiple of 64 bytes).
+        #    
         try:
             header = struct.unpack('<iii', f.read(12))
         except:
             raise BadPakFile, 'Error reading PAK file header'
+            
         if header[0] != 0x4b434150:
             raise BadPakFile, 'PAK file header has wrong signature'
-        f.seek(header[1])
+            
         if (header[2] % 64) != 0:
             raise BadPakFile, 'Corrupt PAK directory length, not a multiple of 64 bytes'
 
-        namelist = []
+        #
+        # Each Pak directory entry is 64 bytes total.  A 56-byte 
+        # null terminated string holding the name of the item, 4 bytes
+        # indication the position of the item within the pak file, 
+        # and 4 bytes indicating the length of the item.
+        #
+        f.seek(header[1])        
         infodict = {}
         for i in range(header[2] / 64):
             info = struct.unpack('<56sii', f.read(64))
-            name = info[0][:string.find(info[0], '\000')]
-            pi = PakInfo(name, info[1], info[2])
-            namelist.append(name)
-            infodict[name] = pi
+            name = info[0].split('\000', 1)[0]
+            infodict[name] = PakInfo(name, info[1], info[2])
 
-        # everything's groovy, save what we found
-        self._file = f
-        self._names = namelist    
-        self._info = infodict
+        # everything's groovy, save what we found, let the file close itself
+        self.__filename = filename
+        self.__info = infodict
 
-    def close(self):
-        """Close the underlying file, the name and info lists are still available."""
-        self._file.close()
-        self._file = None
 
     def getinfo(self, name):
-        """Fetch the PakInfo object for a given name"""
-        return self._info[name]
+        """
+        Fetch the PakInfo object for an item with the given name.
+        """
+        return self.__info[name]
+
 
     def has_key(self, name):
-        """ Check if the pak file has the given name"""
-        return self._info.has_key(name)
+        """ 
+        Check if the pak file has an item with the given name
+        """
+        return self.__info.has_key(name)
+
 
     def infolist(self):
-        """Return a list of PakInfo objects, representing the contents of the PAK file."""
-        result = []
-        for n in self._names:
-            result.append(self._info[n])
-        return result
+        """
+        Return a list of PakInfo objects, representing the contents of the PAK file.
+        """
+        return self.__info.values()
+
 
     def namelist(self):
-        """Return a list of names of the members of the PAK file."""
-        return self._names[:]
+        """
+        Return a list of names of the members of the PAK file.
+        """
+        return self.__info.keys()
+
 
     def read(self, name):
-        """Read the contents of a particular member of the PAK file."""
-        pi = self._info[name]
-        self._file.seek(pi.file_offset)
-        return self._file.read(pi.file_size)
+        """
+        Read the entire contents of a particular member of the PAK file, 
+        returned as a string.
+        """
+        pi = self.__info[name]
+        f = open(self.__filename, 'rb')
+        f.seek(pi.file_offset)
+        return f.read(pi.file_size)
+
 
 class ResourceDir:
+    """
+    Gives a plain directory an interface similar to the PakFile class, for
+    the convenience of the PakLoader class.  Hides files with names 
+    ending in .pak, so the server won't attempt to load or download them    
+    """
     def __init__(self, dirname):
         self.dirname = [dirname]
-    def _real_path(self, name):
-        return apply(os.path.join, self.dirname + string.split(name, '/'))
+        
+        
+    def __real_path(self, name):
+        return apply(os.path.join, self.dirname + name.split('/'))
+        
+        
     def has_key(self, name):
-        return os.access(self._real_path(name), os.R_OK)        
+        """
+        Check if the directory has an item with
+        the given name.  
+        """
+        if name.lower().endswith('.pak'):
+            return 0
+            
+        return os.access(self.__real_path(name), os.R_OK)        
+
+        
     def read(self, name):
-        return open(self._real_path(name), 'rb').read()            
+        """ 
+        Read the entire contents of a file with the given name.
+        """
+        return open(self.__real_path(name), 'rb').read()            
+
 
 class PakLoader:
-    """Read from multiple PAK files"""
+    """
+    Read from multiple PAK files and directories.  The search order
+    is: last added == first searched
+    """
     def __init__(self):
         self._paklist = []
+
 
     def add_file(self, filename):        
         """ 
@@ -99,6 +167,7 @@ class PakLoader:
         will be first searched.
         """
         self._paklist.insert(0, PakFile(filename))
+
 
     def add_directory(self, dirname):
         """ 
@@ -110,29 +179,36 @@ class PakLoader:
         files = os.listdir(dirname)
         files.sort()
         for f in files:
-            if string.lower(f[-4:]) == '.pak':
+            if f.lower().endswith('.pak'):
                 try:
                     self.add_file(os.path.join(dirname, f))
                 except:
                     pass
         self._paklist.insert(0, ResourceDir(dirname))
 
+
     def has_key(self, name):
-        """Check if any of the pak files has the given name"""
+        """
+        Check if any of the pak files or directories has the given name
+        """
         for p in self._paklist:
             if p.has_key(name):
                 return 1
         return 0
 
+
     def read(self, name):
-        """Search the list of PAK files for a named resource, and read it
-           Raises a KeyError if it can't find the named item"""
+        """
+        Search the list of PAK files and directories for a named 
+        resource, and read it. Raises a KeyError if it can't find 
+        the named item.
+        """
         for p in self._paklist:
-            try:
+            if p.has_key(name):
                 return p.read(name)
-            except:
-                pass
+                
         raise KeyError, '%s not found' % (name)
+        
 
 #
 # Test code, run while in the quake/quakeworld directory
