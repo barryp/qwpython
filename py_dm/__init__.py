@@ -6,6 +6,10 @@ from qwpython.qwsv import engine, Vector
 import qwpython.qcsupport
 from qwpython.qcsupport import qc
 
+# Stop on CTRL-C
+import signal
+signal.signal(signal.SIGINT, engine.stop)
+
 #
 # Modules translated from QuakeC
 #
