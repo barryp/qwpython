@@ -1052,9 +1052,9 @@ qboolean SV_FilterPacket (void)
 
 	for (i=0 ; i<numipfilters ; i++)
 		if ( (in & ipfilters[i].mask) == ipfilters[i].compare)
-			return filterban.value;
+			return (qboolean)(filterban.value > 0);
 
-	return !filterban.value;
+	return !((qboolean)(filterban.value > 0));
 }
 
 //============================================================================

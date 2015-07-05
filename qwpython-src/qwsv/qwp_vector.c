@@ -390,7 +390,7 @@ PyObject * create_qwp_vector(vec3_t source)
     {
     qwp_vector_t * result;
 
-	result = (qwp_vector_t *)PyObject_NEW(qwp_vector_t, &QWP_Vector_Type);
+	result = PyObject_NEW(qwp_vector_t, &QWP_Vector_Type);
 
     result->v[0] = source[0];
     result->v[1] = source[1];

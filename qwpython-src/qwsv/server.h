@@ -172,7 +172,7 @@ typedef struct client_s
 
 	PyObject		*download;			// Python String being downloaded
 	PyObject		*download_name;		// name of the item being downloaded
-	int				downloadsize;		// total bytes
+	Py_ssize_t		downloadsize;		// total bytes
 	int				downloadcount;		// bytes sent
 	char			*download_ptr;		// current byte
 

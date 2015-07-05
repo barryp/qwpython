@@ -121,7 +121,7 @@ qboolean	NET_StringToAdr (char *s, netadr_t *a)
 	else
 	{
 		if ((h = gethostbyname(copy)) == 0)
-			return 0;
+			return false;
 		*(int *)&sadr.sin_addr = *(int *)h->h_addr_list[0];
 	}
 	
@@ -196,12 +196,12 @@ qboolean NET_GetPacket (void)
 		return false;
 	}
 
-	return ret;
+	return (qboolean)(ret > 0);
 }
 
 //=============================================================================
 
-void NET_SendPacket (int length, void *data, netadr_t to)
+void NET_SendPacket(size_t length, void *data, netadr_t to)
 {
 	int ret;
 	struct sockaddr_in	addr;

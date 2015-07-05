@@ -249,8 +249,8 @@ SV_PreSpawn_f
 */
 void SV_PreSpawn_f (void)
 {
-	unsigned	buf;
-	unsigned	check;
+	int	buf;
+	int	check;
 
 	if (host_client->state != cs_connected)
 	{
@@ -446,7 +446,7 @@ SV_Begin_f
 */
 void SV_Begin_f (void)
 {
-	unsigned pmodel = 0, emodel = 0;
+	int pmodel = 0, emodel = 0;
 	int		i;
 
 	if (host_client->state == cs_spawned)
@@ -1478,7 +1478,7 @@ void SV_RunCmd (usercmd_t *ucmd)
 	pmove.numphysent = 1;
 	pmove.physents[0].model = sv.worldmodel;
 	pmove.cmd = *ucmd;
-	pmove.dead = sv_player->v.health <= 0;
+	pmove.dead = (qboolean)(sv_player->v.health <= 0);
 	pmove.oldbuttons = host_client->oldbuttons;
 
 	movevars.entgravity = host_client->entgravity;

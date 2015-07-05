@@ -42,7 +42,7 @@ cvar_t	registered = {"registered","1"};
 
 qboolean	com_modified;	// set true if using non-id files
 
-qboolean		msg_suppress_1 = 0;
+qboolean	msg_suppress_1 = false;
 
 // if a packfile directory differs from this, it is assumed to be hacked
 #define	PAK0_COUNT		339
@@ -50,7 +50,7 @@ qboolean		msg_suppress_1 = 0;
 
 qboolean		standard_quake = true, rogue, hipnotic;
 
-char	gamedirfile[MAX_OSPATH];
+//char	gamedirfile[MAX_OSPATH];
 
 
 /*

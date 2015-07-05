@@ -188,7 +188,7 @@ static PyObject * entity_infokey(PyObject *self, PyObject *args)
 
 static PyObject * entity_link(PyObject *self, PyObject *args)
     {
-    SV_LinkEdict(((qwp_entity_t *)self)->c_entity, 0);
+    SV_LinkEdict(((qwp_entity_t *)self)->c_entity, false);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -1335,7 +1335,7 @@ PyObject * create_qwp_entity(struct edict_s *ent)
     {
     qwp_entity_t * result;
 
-	result = (qwp_entity_t *)PyObject_NEW(qwp_entity_t, &QWP_Entity_Type);
+	result = PyObject_NEW(qwp_entity_t, &QWP_Entity_Type);
     result->c_entity = ent;
     result->dict = PyDict_New();
 

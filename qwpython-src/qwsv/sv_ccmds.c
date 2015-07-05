@@ -428,7 +428,7 @@ void SV_Status_f (void)
 			}
 			Con_Printf ("%4i %4i %5.2f\n"
 				, (int)(1000*cl->netchan.frame_rate)
-				, (int)SV_CalcPing (cl)
+				, SV_CalcPing (cl)
 				, 100.0*cl->netchan.drop_count / cl->netchan.incoming_sequence);
 		}
 	} else {
@@ -462,7 +462,7 @@ void SV_Status_f (void)
 			}
 			Con_Printf ("%4i %4i %3.1f %4i"
 				, (int)(1000*cl->netchan.frame_rate)
-				, (int)SV_CalcPing (cl)
+				, SV_CalcPing (cl)
 				, 100.0*cl->netchan.drop_count / cl->netchan.incoming_sequence
 				, cl->netchan.qport);
 			if (cl->spectator)

@@ -316,7 +316,7 @@ unsigned short COM_CRC_File(char *path)
     PyObject *contents;
 	unsigned short crc;
 	byte *buf;
-	int len;
+	Py_ssize_t len;
 
 	contents = PyObject_CallMethod(qwp_engine->loader, "read", "s", path);
 	if (!contents)
@@ -388,7 +388,7 @@ byte *COM_LoadFile (char *path, int usehunk)
 	{
 	PyObject *result;
 	char *p;
-	int len;
+	Py_ssize_t len;
 	byte *buf;
 	char base[32];
 
@@ -423,7 +423,7 @@ byte *COM_LoadFile (char *path, int usehunk)
 	else
 		{
 		memcpy(buf, p, len);
-		((byte *)buf)[len] = 0;
+		buf[len] = 0;
 		}
 
 	Py_DECREF(result);
@@ -586,6 +586,8 @@ static PyObject * get_qc_global(PyObject *self, PyObject *args)
             if (!strcmp(name, "world"))
                 return get_entity(pr_global_struct->world);
             break;
+		default:
+			break;
         }
 
     PyErr_Format(PyExc_AttributeError, "attribute: %s not found", name);
@@ -721,6 +723,8 @@ int set_qc_global0(char *name, PyObject *value)
             if (!strcmp(name, "world"))
                 return set_entity(&(pr_global_struct->world), value);
             break;
+		default:
+			break;
         }
 
     PyErr_Format(PyExc_AttributeError, "attribute: %s not found", name);
@@ -1085,6 +1089,8 @@ static sizebuf_t *WriteDest(int dest)
 
 	    case MSG_MULTICAST:
     		return &sv.multicast;
+		default:
+			break;
         }
 
 	PyErr_SetString(PyExc_TypeError, "Bad destination");	
@@ -1341,7 +1347,7 @@ static PyTypeObject Engine_Type =
 static void init_qwp_engine(void)
 	{
 	Engine_Type.ob_type = &PyType_Type;  // Fix for MSVC problem
-	qwp_engine = (qwp_engine_t *)PyObject_NEW(qwp_engine_t, &Engine_Type);
+	qwp_engine = PyObject_NEW(qwp_engine_t, &Engine_Type);
 
     qwp_engine->frame_handler = Py_None;
     Py_INCREF(Py_None);

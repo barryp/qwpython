@@ -53,8 +53,10 @@ int			net_send_socket;	// blocking, for sends
 #define	MAX_UDP_PACKET	8192
 byte		net_message_buffer[MAX_UDP_PACKET];
 
+/*
 int gethostname (char *, int);
 int close (int);
+*/
 
 //=============================================================================
 
@@ -145,7 +147,7 @@ qboolean	NET_StringToAdr (char *s, netadr_t *a)
 	else
 	{
 		if (! (h = gethostbyname(copy)) )
-			return 0;
+			return false;
 		*(int *)&sadr.sin_addr = *(int *)h->h_addr_list[0];
 	}
 	
@@ -190,9 +192,9 @@ qboolean NET_IsClientLegal(netadr_t *adr)
 
 qboolean NET_GetPacket (void)
 {
-	int 	ret;
+	ssize_t 			ret;
 	struct sockaddr_in	from;
-	int		fromlen;
+	socklen_t			fromlen;
 
 	fromlen = sizeof(from);
 	ret = recvfrom (net_socket, net_message_buffer, sizeof(net_message_buffer), 0, (struct sockaddr *)&from, &fromlen);
@@ -208,19 +210,19 @@ qboolean NET_GetPacket (void)
 	net_message.cursize = ret;
 	SockadrToNetadr (&from, &net_from);
 
-	return ret;
+	return (qboolean)(ret > 0);
 }
 
 //=============================================================================
 
-void NET_SendPacket (int length, void *data, netadr_t to)
+void NET_SendPacket(size_t length, void *data, netadr_t to)
 {
-	int ret;
+	ssize_t 			ret;
 	struct sockaddr_in	addr;
 
 	NetadrToSockadr (&to, &addr);
 
-	ret = sendto (net_socket, data, length, 0, (struct sockaddr *)&addr, sizeof(addr) );
+	ret = sendto(net_socket, data, length, 0, (struct sockaddr *) &addr, sizeof(addr));
 	if (ret == -1) {
 		if (errno == EWOULDBLOCK)
 			return;
@@ -265,7 +267,7 @@ void NET_GetLocalAddress (void)
 {
 	char	buff[MAXHOSTNAMELEN];
 	struct sockaddr_in	address;
-	int		namelen;
+	socklen_t			namelen;
 
 	gethostname(buff, MAXHOSTNAMELEN);
 	buff[MAXHOSTNAMELEN-1] = 0;

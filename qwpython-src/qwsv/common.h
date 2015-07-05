@@ -40,7 +40,7 @@ typedef struct sizebuf_s
 	qboolean	overflowed;		// set to true if the buffer size failed
 	byte	*data;
 	int		maxsize;
-	int		cursize;
+	ssize_t	cursize;
 } sizebuf_t;
 
 void SZ_Clear (sizebuf_t *buf);
