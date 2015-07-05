@@ -142,7 +142,7 @@ def is_token(t, v):
     return isinstance(t, QC_Token) and (t.value == v)
 
 _digits = '0123456789'
-_delimiters = '!&�()*+,-/:;<=>|[]{} \t\r\n'
+_delimiters = '!&()*+,-/:;<=>|[]{} \t\r\n'
 _keywords = ['if', 'else', 'while', 'do', 'return', 'local', 
              'void', 'float', 'string', 'vector', 'entity',
              '.void', '.float', '.string', '.vector', '.entity']
