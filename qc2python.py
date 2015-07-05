@@ -142,7 +142,7 @@ def is_token(t, v):
     return isinstance(t, QC_Token) and (t.value == v)
 
 _digits = '0123456789'
-_delimiters = '!&‘()*+,-/:;<=>|[]{} \t\r\n'
+_delimiters = '!&ï¿½()*+,-/:;<=>|[]{} \t\r\n'
 _keywords = ['if', 'else', 'while', 'do', 'return', 'local', 
              'void', 'float', 'string', 'vector', 'entity',
              '.void', '.float', '.string', '.vector', '.entity']
@@ -1276,6 +1276,10 @@ import sys
 from qwpython.qwsv import engine, Vector
 import qwpython.qcsupport
 from qwpython.qcsupport import qc
+
+# Stop on CTRL-C
+import signal
+signal.signal(signal.SIGINT, engine.stop)
 
 #
 # Modules translated from QuakeC
